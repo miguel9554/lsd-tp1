@@ -1,0 +1,26 @@
+*******************************************************************************
+*** Circuito para simular la transicion de un estado logico a otro en un
+*** inversor con una carga especifica y una pendiente de entrada
+*******************************************************************************
+
+* Usar modelo del inversor lento, estando sus NMOS y PMOS dimensionados
+* para que la excursion sea simetrica
+.include ../caracteristicas_proceso/dig_0p25u_2p5V_stdcells_slow.inc
+
+* Inversor cuya capacidad se va a analizar
+X1 2 3 4 0 inv_x1y1
+
+* Resistencia conectada al nodo de entrada del inversor para poder variar
+* el tiempo de crecimiento o decrecimiento de la entrada
+R (1 2) r=101.44927536231884k
+
+* Capacidad conectada al nodo de salida del inversor
+C1 (3 0) c=13.000000000000002f
+
+* Fuente de pulsos
+vp 1 0 PULSE 2.5 0 0 0.01ps 0.01ps 3n 6n
+
+* Alimentacion de 2.5V para el inversor
+v1 4 0 dc 2.5
+
+.end

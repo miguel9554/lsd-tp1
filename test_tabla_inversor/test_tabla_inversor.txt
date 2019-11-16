@@ -1,0 +1,40 @@
+******************************************************
+**** Script en NUTMEG para ser llamado por Python ****
+
+** Descripcion: obtiene el rise time y el fall time
+** a la salida de un inversor con una carga capacitiva dada
+** y un rise-time/fall-time de entrada determinado
+
+
+.control
+* Cargar circuito
+source test_tabla_inversor.cir
+
+* Configurar el formato con el que se
+* guardaran los datos de salida
+set noprintheader
+set noprintindex
+set nobreak
+
+******************
+** Rise time *****
+******************
+
+* Simular rise-time
+tran 0.1p 6n 1.5n
+
+* Guardar resultados
+print v(2) v(3) > fall_time_tabla_inversor.txt
+
+******************
+** Fall time *****
+******************
+
+* Simular fall-time
+tran 0.1p 8n 5.5n
+
+* Guardar resultados
+print v(2) v(3) > rise_time_tabla_inversor.txt
+
+.endc
+.end

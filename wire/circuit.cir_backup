@@ -1,0 +1,9 @@
+
+R0 vin 1 1k
+C0 1 0 1u
+R1 1 2 1k
+C1 2 0 1u
+
+vp vin 0 PULSE 0 2.5 0 0 0 1 10
+
+.end

@@ -1,0 +1,42 @@
+**********************************************************************************
+** Circuito para hallar el rise / fall time de un inversor cuando esta cargado 
+** por otros 5 y cuando se encuentra cargado por si mismo
+** --> Estos son datos utilizados como el maximo slew y el minimo que puede tener 
+** a la entrada una unidad para hallar las tablas de timing
+**********************************************************************************
+
+* Usar modelo del inversor lento, estando sus NMOS y PMOS dimensionados
+* para que la excursion sea simetrica
+.include ../caracteristicas_proceso/dig_0p25u_2p5V_stdcells_slow.inc
+
+****************************************
+**** Inversor cargado con otros 5 ******
+****************************************
+
+* Inversor cuya capacidad se va a analizar
+X01 1 2 4 0 inv_x1y1
+
+* Inversores de carga del primer inversor
+X1 2 3 4 0 inv_x1y1
+X2 2 3 4 0 inv_x1y1
+X3 2 3 4 0 inv_x1y1
+X4 2 3 4 0 inv_x1y1
+X5 2 3 4 0 inv_x1y1
+
+****************************************
+**** Inversor cargado con otros 5 ******
+****************************************
+* Inversor cuya capacidad se va a analizar
+X02 1 5 4 0 inv_x1y1
+
+****************************************
+**** Fuentes ******
+****************************************
+
+* Fuente de pulsos
+vp 1 0 PULSE 2.5 0 0 30ps 30ps 3n 6n
+
+* Alimentacion de 2.5V para el inversor
+v1 4 0 dc 2.5
+
+.end

@@ -1,0 +1,38 @@
+******************************************************
+**** Script en NUTMEG para ser llamado por Python ****
+
+** Descripcion: obtiene el rise time y el fall time
+** De un inversor balanceado y
+** lo guarda en los archivos:
+** --> rise_time_Cin_inversor.txt
+** --> fall_time_Cin_inversor.txt
+
+
+.control
+* Cargar circuito
+source test_tabla_clock_to_Q_FFD.cir
+
+* Configurar el formato con el que se
+* guardaran los datos de salida
+set noprintheader
+set noprintindex
+set nobreak
+
+**********************
+** Clock to Q LH *****
+**********************
+tran 0.1p 180n 120n
+
+* Guardar resultados
+print v(2) v(5) > clock_to_Q_LH.txt
+
+**********************
+** Clock to Q HL *****
+**********************
+tran 0.1p 80n 20n
+
+* Guardar resultados
+print v(2) v(5) > clock_to_Q_HL.txt
+
+.endc
+.end

@@ -1,0 +1,34 @@
+******************************************************
+**** Script en NUTMEG para ser llamado por Python ****
+
+** Descripcion: simula los flancos LH y HL del FFD
+** al producirse un flanco ascendente de reloj
+
+.control
+* Cargar circuito
+source test_tabla_clock_to_Q_FFD.cir
+
+* Configurar el formato con el que se
+* guardaran los datos de salida
+set noprintheader
+set noprintindex
+set nobreak
+
+**********************
+** Transicion LH *****
+**********************
+tran 5p 155n 145n
+
+* Guardar resultados
+print v(2) v(5) > transicion_LH_FFD.txt
+
+**********************
+** Transicion HL *****
+**********************
+tran 5p 80n 40n
+
+* Guardar resultados
+print v(2) v(5) > transicion_HL_FFD.txt
+
+.endc
+.end
