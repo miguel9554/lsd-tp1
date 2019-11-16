@@ -27,9 +27,9 @@ class Results:
             for line in fp:
                 m = regex.match(line)
                 if m:
-                    self.time.append([float(m.group('time'))])
-                    self.vin.append([float(m.group('vin'))])
-                    self.vout.append([float(m.group('vout'))])
+                    self.time = np.append(self.time, [float(m.group('time'))])
+                    self.vin = np.append(self.vin, [float(m.group('vin'))])
+                    self.vout = np.append(self.vout, [float(m.group('vout'))])
 
     def plot(self, time_scale_factor=1):
         plt.plot(self.time * time_scale_factor, self.vin, self.time * time_scale_factor, self.vout)

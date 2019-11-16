@@ -1,7 +1,0 @@
-
-.control
-source circuit.cir
-tran 1u 20m
-print v(1) v(2) > results.dat
-.endc
-.end
