@@ -36,3 +36,13 @@ class Results:
         plt.ylabel('Tensión [V]')
         plt.xlabel('Tiempo [s]')
         plt.show()
+
+    def get_rise_time(self):
+        v_inf = np.max(self.vout)*0.1
+        v_top = np.max(self.vout) * 0.9
+
+        t_inf = self.time[np.max(np.nonzero(self.vout < v_inf))]
+        t_top = self.time[np.min(np.nonzero(self.vout > v_top))]
+
+        return t_top - t_inf
+
