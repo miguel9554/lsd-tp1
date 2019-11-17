@@ -7,7 +7,8 @@ class Results:
 
     DEFAULT_RESULTS_FILENAME = 'results.dat'
 
-    def __init__(self, time=None, vin=None, vout=None, filename=DEFAULT_RESULTS_FILENAME):
+    def __init__(self, time=None, vin=
+    None, vout=None, filename=DEFAULT_RESULTS_FILENAME):
         self.filename = filename
         self.time = np.array([]) if not time else time
         self.vin = np.array([]) if not vin else vin
