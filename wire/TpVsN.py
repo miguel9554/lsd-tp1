@@ -1,23 +1,23 @@
-from wire.Circuit import Circuit
-from wire.Simulation import Simulation
-from wire.Results import Results
-from wire.Source import StepSource
+from Circuit import Circuit
+from Simulation import Simulation
+from Results import Results
+from Source import StepSource
 import matplotlib.pyplot as plt
 
 
 # parametros del circuito
 C = 10e-6
 R = 10e3
-N_max = 40
+N_max = 150
 
 # parametros de la fuente
 V = 2.5
-pulse_width = 100
-period = 100
+pulse_width = 5
+period = pulse_width
 
 # parametros de la simulacion
-end_time = 100
-time_step = end_time/1e3
+end_time = pulse_width
+time_step = end_time/1e4
 
 # contenedores de los resultados
 T_vec = []

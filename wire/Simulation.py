@@ -1,5 +1,5 @@
-from wire.Circuit import Circuit
-from wire import Utils
+from Circuit import Circuit
+import Utils
 from subprocess import call
 
 

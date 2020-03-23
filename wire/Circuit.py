@@ -1,5 +1,5 @@
-from wire import Utils
-from wire.Source import Source
+import Utils
+import Source
 
 class Circuit:
 
