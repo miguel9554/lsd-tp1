@@ -20,7 +20,7 @@ class RC_line:
         state_vector_length = self.sections + 2
         moments = np.zeros((state_vector_length, max_moment+1))
 
-        # Los momentos de órden 1 son tensiones unitarias y corriente nula
+        # Los momentos de órden 0 son tensiones unitarias y corriente nula
         moments[:state_vector_length-1, 0] = np.ones(state_vector_length-1)
 
         for order in range (1, max_moment+1):
