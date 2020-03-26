@@ -1,37 +1,38 @@
 import numpy as np
 
 
-N = 4 # Cantidad de cuadripolos/resitencias/capacitores
+# Cantidad de cuadripolos/resitencias/capacitores
+N = 4 
+# Hasta que momento queremos calcular
+M = 3
+# Resistencia y capacidad de cada elemento
 R = 1
-g = 1/R
-c = 1
+C = 1
 
-E = np.zeros(N+1)
-E[0] = 1
+state_vector_length = N+2
 
-G = np.zeros((N+2, N+2)) # Matriz de conductancias
-for column in range(N+1):
-    for row in range(N+1):
-        if row == column:
-            if row == 0 or row == N:
-                G[row, column] = g
-            else:
-                G[row, column] = 2*g
-        elif abs(row - column) == 1:
-            G[row, column] = -g
-        else:
-            continue
+# m0 es un vector de unos salvo un cero en la última posición
+m0 = np.ones(state_vector_length)
+m0[len(m0)-1] = 0
 
-C = np.zeros((N+2, N+2)) # Matriz de conductancias
-for column in range(N+2):
-    for row in range(N+2):
-        if (row == column) and (row != 0):
-            C[row, column] = c
-        elif ((row == N+1) and (column > 0)) or ((column == N+1) and (row > 0)):
-            C[row, column] = -c
-        else:
-            continue
+# m1 es más turbio
+m1 = np.zeros(state_vector_length)
+m1[0] = 0
+m1[1] = -N*R
+m1[len(m1)-1] = -N
+for i in range(2, len(m1)-1):
+    m1[i] = m1[i-1] - (N+1-i)*R
 
-print(np.linalg.inv(G))
-print(C)
-print(E.transpose())
+# m2, otro hijo de puta
+m2 = np.zeros(state_vector_length)
+# El nodo 0 está a tierra
+m2[0] = 0
+# El último nodo es la corriente por la fuente de tensión, la suma con signo 
+# negativo de todas las corrientes de las fuentes de corriente
+m2[len(m2)-1] = -np.sum(m1[1:N+1])
+for i in range(1, len(m2)-1):   
+    m2[i] = m2[i-1] - np.sum(m1[i:N+1])*R
+
+print(m0)
+print(m1)
+print(m2)
