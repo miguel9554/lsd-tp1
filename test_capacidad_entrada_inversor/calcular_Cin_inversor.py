@@ -21,7 +21,7 @@ nombre_simulacion = "test_capacidad_entrada_inversor_lento.txt"
 call(["spiceopus", "-c", "-b", nombre_simulacion]) 
 
 ###### Rise time
-with open('  .txt') as csvfile:
+with open('rise_time_Cin_inversor.txt') as csvfile:
 	tabla_rise_time = list(csv.reader(csvfile, delimiter='\t'))
 	tiempo = [];
 	tension = [];
@@ -52,7 +52,7 @@ with open('  .txt') as csvfile:
 	print("*** Rise time ****")
 	print("T_10 es: " + str(t_10))
 	print("T_90 es: " + str(t_90))
-	print("El rise time es: " + str(t_90))
+	print("El rise time es: " + str(t_90 - t_10))
 
 	# Obtener la Cin sabiendo que la resistencia es de 1k
 	R = 1E3
@@ -71,12 +71,7 @@ with open('fall_time_Cin_inversor.txt') as csvfile:
 		tiempo.append(float(row[0]));
 		tension.append(float(row[1]));
 
-	valor_maximo = 0
-	for i in range(len(tension)):
-		if tension[i] > valor_maximo:
-			valor_maximo = tension[i]
-
-	tension_t90 = 0.9*valor_maximo
+	tension_t90 = 0.9*tension[0]
 	t_90 = 0
 	for i in range(len(tension)):
 		if tension[i] < tension_t90:
@@ -93,7 +88,7 @@ with open('fall_time_Cin_inversor.txt') as csvfile:
 	print("*** Fall time ****")
 	print("T_10 es: " + str(t_10))
 	print("T_90 es: " + str(t_90))
-	print("El rise time es: " + str(t_90))
+	print("El rise time es: " + str(t_10 - t_90))
 
 	# Obtener la Cin sabiendo que la resistencia es de 1k
 	R = 1E3

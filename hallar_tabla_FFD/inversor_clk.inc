@@ -3,7 +3,7 @@
 ******************************************************************
 
 ** La salida del subcircuito es el nodo de salida del primer inversor
-** Dicha salida esta destinada a ser utilizada como señal de clk en
+** Dicha salida esta destinada a ser utilizada como señal de clk en el
 ** trabajo practico
 
 .include ../caracteristicas_proceso/dig_0p25u_2p5V_stdcells_slow.inc

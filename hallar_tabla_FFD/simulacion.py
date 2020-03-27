@@ -8,13 +8,14 @@
 from subprocess import call # Para ejecutar SpiceOpus desde Python
 import re 	
 
-def modificar_simulacion(cap):
+def modificar_simulacion(cap, res):
 	# Abrir el arhivo del circuito para cambiar la resistencia de entrada
 	# o la capacidad de salida 
 	circuito = "test_tabla_clock_to_Q_FFD.cir"
 	archivo_circuito = open(circuito,'r+')
 	texto_archivo_circuito = archivo_circuito.read()
 	texto_archivo_circuito = re.sub(r'(?<=c\=)(.*)(?=f)', str(cap*1e15), texto_archivo_circuito)
+	texto_archivo_circuito = re.sub(r'(?<=r\=)(.*)(?=k)', str(res/1e3), texto_archivo_circuito)
 	archivo_circuito.seek(0)
 	archivo_circuito.write(texto_archivo_circuito)
 	archivo_circuito.truncate()

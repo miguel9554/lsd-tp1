@@ -42,7 +42,7 @@ rango_slew = [x*1e-12 for x in rango_slew]
 # segun lo simulado, es 3fF
 Cin_inv = 3e-15
 
-rango_resistencias = [x/(0.69*Cin_inv) for x in rango_slew]
+rango_resistencias = [x*0.69/Cin_inv for x in rango_slew]
 
 ## Generar un rango de capacidades de salida
 # NOTA: se ha tomado como maxima capacidad la de 5 invesores
@@ -65,20 +65,20 @@ for cap_it in range(len(rango_capacidad)):
 		tf = calcular_fall_time(archivo_fall_time)
 		t_HL = calcular_tHL(archivo_fall_time)
 
-		tp = (t_HL + t_LH)/2
 		# Crear una unica lista como elemento de la matriz de timing
-		celda_timing = [tr, tf, tp]
+		celda_timing = [rango_capacidad[cap_it], rango_slew[res_it],tr, tf, t_HL, t_LH]
 
 		# Sumar la lista a la matriz de timing
 		matriz_timing[cap_it][res_it] = celda_timing
 
 
 with open(archivo_tabla_inversor, 'w') as f:
+	f.write('CL, Tau_in, Rise Time, Fall Time, t_HL, t_LH')
+	f.write("\n")
 	for cap in range(len(rango_capacidad)):
 		for res in range(len(rango_resistencias)):
-			f.write(' , '.join('%.2E' % i for i in matriz_timing[cap][res]))
-			f.write('; ')
-		f.write("\n")
+			f.write(','.join('{:.6e}'.format(i) for i in matriz_timing[cap][res]))
+			f.write("\n")
 
 
 

@@ -63,7 +63,7 @@ def calcular_fall_time(archivo):
 		tf = t_10 - t_90;
 	return tf
 
-
+	
 def calcular_tLH(archivo):
 	with open(archivo) as csvfile:
 		tabla_rise_time = list(csv.reader(csvfile, delimiter='\t'))
