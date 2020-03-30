@@ -232,9 +232,9 @@ class Estimador:
 
 		# Coeficientes del polinomio de segundo orden en el denominador de la
 		# transferencia
-		a_coef = Rd*R*C1*C2
-		b_coef = Rd*(C1 + C2) + C1*R
-		c_coef = 1
+		a_coef = 1
+		b_coef = (Rd*(C1 + C2) + C1*R)/(R*Rd*C1*C2)
+		c_coef = 1/(R*Rd*C1*C2)
 		
 		# Polos de la corriente del equivalente Pi
 		wp1 = -(-b_coef - (b_coef**2 - 4*a_coef*c_coef)**(0.5))/(2*a_coef)
