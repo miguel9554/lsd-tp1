@@ -6,13 +6,15 @@ import matplotlib.pyplot as plt
 
 
 # parametros del circuito
-C = 10e-6
-R = 10e3
+L = 100e-6
+C = 30e-18*L*1e6+40e-18*L 
+R = 0.1*L*1e6
+tao = 5*R*C
 N_max = 150
 
 # parametros de la fuente
 V = 2.5
-pulse_width = 5
+pulse_width = tao
 period = pulse_width
 
 # parametros de la simulacion
