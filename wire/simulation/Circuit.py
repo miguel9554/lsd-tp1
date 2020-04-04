@@ -1,16 +1,18 @@
 import Utils
 import Source
+import os
+
 
 class Circuit:
 
     DEFAULT_CIRCUIT_FILENAME = 'circuit.cir'
 
-    def __init__(self, r, c, source: Source, n=1, filename=DEFAULT_CIRCUIT_FILENAME):
+    def __init__(self, r, c, source: Source, uid: str, n=1, filename=DEFAULT_CIRCUIT_FILENAME):
         self.R = r
         self.C = c
         self.N = n
         self.Source = source
-        self.filename = filename
+        self.filename = uid + '.' + filename
 
     def generate_file(self):
         with open(self.filename, 'wb') as fp:
@@ -22,3 +24,6 @@ class Circuit:
                     Cname='C' + str(n), node1=str(n+1), node2='0', Cvalue=Utils.float_to_string(self.C/self.N)).encode('ascii'))
             fp.write(self.Source.get_spiceopus_definition().encode('ascii'))
             fp.write('\n\n.end\n'.encode('ascii'))
+    
+    def clean(self):
+        os.remove(self.filename)

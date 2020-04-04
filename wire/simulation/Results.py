@@ -1,15 +1,15 @@
 import re
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 class Results:
 
     DEFAULT_RESULTS_FILENAME = 'results.dat'
 
-    def __init__(self, time=None, vin=
-    None, vout=None, filename=DEFAULT_RESULTS_FILENAME):
-        self.filename = filename
+    def __init__(self, uid: str, time=None, vin=None, vout=None, filename=DEFAULT_RESULTS_FILENAME):
+        self.filename = uid + '.' + filename
         self.time = np.array([]) if not time else time
         self.vin = np.array([]) if not vin else vin
         self.vout = np.array([]) if not vout else vout
@@ -46,4 +46,7 @@ class Results:
         t_top = self.time[np.min(np.nonzero(self.vout > v_top))]
 
         return t_top - t_inf
+    
+    def clean(self):
+        os.remove(self.filename)
 

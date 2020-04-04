@@ -31,7 +31,7 @@ def float_to_string(number: float, decimals: int = 3):
 #		  Vdd : tension de alimentacion del circuito
 #         *args : argumentos que recibe resp
 #	  
-def search_for_t50(resp, max_time, step, Vdd, *args)
+def search_for_t50(resp, max_time, step, Vdd, *args):
 
 	t = 0
 	while (t < max_time):

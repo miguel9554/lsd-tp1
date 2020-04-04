@@ -1,17 +1,18 @@
 from Circuit import Circuit
 import Utils
 from subprocess import call
+import os
 
 
 class Simulation:
 
     DEFAULT_SCRIPT_FILENAME = 'script.nutmeg'
 
-    def __init__(self, step, end_time, circuit: Circuit, filename=DEFAULT_SCRIPT_FILENAME):
+    def __init__(self, step, end_time, circuit: Circuit, uid: str, filename=DEFAULT_SCRIPT_FILENAME):
         self.step = step
         self.end_time = end_time
         self.circuit = circuit
-        self.filename = filename
+        self.filename = uid + '.' + filename
 
     def generate_file(self, results_filename):
         with open(self.filename, 'wb') as fp:
@@ -28,3 +29,6 @@ class Simulation:
         self.circuit.generate_file()
         self.generate_file(results_filename)
         call(["spiceopus", "-c", "-b", self.filename])
+    
+    def clean(self):
+        os.remove(self.filename)
