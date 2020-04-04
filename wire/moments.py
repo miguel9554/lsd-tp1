@@ -1,15 +1,16 @@
 import numpy as np
 from math import e as euler
 
+
 class RC_line:
     def __init__(self, R: int, C: int, sections: int):
         self.R = R
         self.C = C
         self.sections = sections
 
-    def get_moments(self, max_moment: int):
+    def get_moments(self, max_moment: int) -> np.array:
         """ 
-        Devuelve una matriz con los momentos de la línea 
+        Devuelve una matriz con los momentos de la línea cargada con CL
 
         La columna j representa el momento j
         Cada fila corresponde a una variable. En concreto, la fila i
@@ -18,6 +19,15 @@ class RC_line:
         que repreenta la corriente por la fuente de tensión.
         A esta se le cambio el signo con respecto al ejemplo de la página 47.
         """
+        # Construimos el vector de capacidades, representa la capacidad conectada
+        # a cada nodo. C para todos los nodos
+        capacitances = np.ones(self.sections)*self.C
+
+        # Vector de resistencias, representa la resistencia entre los nodos i-1 e i
+        # Vale R para todos los nodos
+        resistances = np.ones(self.sections)*self.R
+
+        # Inicializamos la matriz de momentos en cero
         state_vector_length = self.sections + 2
         moments = np.zeros((state_vector_length, max_moment+1))
 
@@ -25,17 +35,25 @@ class RC_line:
         moments[:state_vector_length-1, 0] = np.ones(state_vector_length-1)
 
         for order in range (1, max_moment+1):
-            # El último nodo es la corriente por la fuente de tensión, la suma con signo 
-            # negativo de todas las corrientes de las fuentes de corriente
-            moments[state_vector_length-1, order] = np.sum(moments[1:state_vector_length-1, order-1])*self.C
-            for i in range(1, state_vector_length-1):   
+            # La última variable del vector de momentos es la corriente que circula por la fuente de tensión
+            # Esta corriente es la suma (con signo cambiado) de todas las corrientes de las fuentes de corriente
+            # Cada una de estas fuentes de corriente tiene como valor la tensión del nodo en la iteración anterior
+            # multiplicada por la capacidad del nodo. Es decir, el producto escalar entre el vector de tensiones 
+            # y el vector de capacidades
+            last_iteration_node_voltages = moments[1:state_vector_length-1, order-1]
+            voltage_source_current = np.dot(last_iteration_node_voltages, capacitances)
+            moments[state_vector_length-1, order] = voltage_source_current
+            # Ahora, computamos la tensión de cada nodo
+            for i in range(1, state_vector_length-1):
+                # La tensión del nodo será la tensión del nodo anterior MAS la tensión que cae sobre el resistor
+                # que une los nodos
                 # La corriente es la suma de todas las fuentes de corriente a la derecha del resistor
                 # Cada fuente de corriente vale C*m_i-1(V), es decir, la tensión del momento anterior
                 # multiplicada por la capacidad.
-                I = np.sum(moments[i:state_vector_length-1, order-1])*self.C
+                I = np.dot(last_iteration_node_voltages[i-1:], capacitances[i-1:])
                 # La tensión del nodo (el momento) será la suma del nodo ya calculado y la tensión
                 # que cae en el resistor (I*R)
-                moments[i, order] = moments[i-1, order] - self.R*I
+                moments[i, order] = moments[i-1, order] - resistances[i-1]*I
 
         return moments
 
