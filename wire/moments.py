@@ -3,7 +3,7 @@ from math import e as euler
 
 
 class RC_line:
-    def __init__(self, R: int, C: int, sections: int, CL: float=0):
+    def __init__(self, R: float, C: float, sections: int, CL: float=0):
         self.R = R
         self.C = C
         self.CL = CL
