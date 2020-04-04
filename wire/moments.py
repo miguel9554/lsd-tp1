@@ -3,9 +3,10 @@ from math import e as euler
 
 
 class RC_line:
-    def __init__(self, R: int, C: int, sections: int):
+    def __init__(self, R: int, C: int, sections: int, CL: float=0):
         self.R = R
         self.C = C
+        self.CL = CL
         self.sections = sections
 
     def get_moments(self, max_moment: int) -> np.array:
@@ -20,8 +21,9 @@ class RC_line:
         A esta se le cambio el signo con respecto al ejemplo de la página 47.
         """
         # Construimos el vector de capacidades, representa la capacidad conectada
-        # a cada nodo. C para todos los nodos
+        # a cada nodo. C para todos los nodos, salvo el último que tiene CL en paralelo
         capacitances = np.ones(self.sections)*self.C
+        capacitances[self.sections-1] = C + CL
 
         # Vector de resistencias, representa la resistencia entre los nodos i-1 e i
         # Vale R para todos los nodos
@@ -308,8 +310,10 @@ if __name__ == "__main__":
     # Resistencia y capacidad de cada elemento
     R = 1
     C = 1
+    # Capacidad de carga
+    CL = 0
 
-    RC = RC_line(R, C, N)
+    RC = RC_line(R, C, N, CL)
     print(RC.get_moments(M))
     print(RC.get_pi_model())
 
