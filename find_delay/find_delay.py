@@ -5,6 +5,7 @@ from line import Line
 from inverter import Inverter
 from vsource import Vsource
 
+# Construimos el árbol que representa al circuito
 source = Node(name='source', device=Vsource())
 ffd1 = Node(name='ffd1', parent=source, device=FFD())
 line1 = Node(name='line1', parent=ffd1, device=Line())
@@ -21,7 +22,7 @@ total_delay = 0
 # El último elemento no lo iteramos, solo nos interesa
 # su capacidad de entrada, la carga que representa
 w = Walker()
-upward, common, downwards = w.walk(ffd1, ffd2)
+upward, common, downwards = w.walk(source, ffd2)
 for device in downwards[:-1]:
     print(f"Analizando el dispositivo {device.name}")
     # Obtenemos los parametros necesarios para computar
