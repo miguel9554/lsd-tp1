@@ -12,9 +12,9 @@ class Device(ABC):
         pass
 
     @abstractmethod
-    def get_delay(self) -> float:
+    def get_delay(self, input_slew: float, load: float) -> float:
         pass
 
     @abstractmethod
-    def get_output_slew(self) -> float:
+    def get_output_slew(self, input_slew: float, load: float) -> float:
         pass
