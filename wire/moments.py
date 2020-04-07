@@ -23,7 +23,7 @@ class RC_line:
         # Construimos el vector de capacidades, representa la capacidad conectada
         # a cada nodo. C para todos los nodos, salvo el último que tiene CL en paralelo
         capacitances = np.ones(self.sections)*self.C
-        capacitances[self.sections-1] = C + CL
+        capacitances[self.sections-1] = self.C + self.CL
 
         # Vector de resistencias, representa la resistencia entre los nodos i-1 e i
         # Vale R para todos los nodos
