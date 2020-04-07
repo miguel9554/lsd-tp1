@@ -23,17 +23,17 @@ total_delay = 0
 # su capacidad de entrada, la carga que representa
 w = Walker()
 upward, common, downwards = w.walk(source, ffd2)
-for device in downwards[:-1]:
-    print(f"Analizando el dispositivo {device.name}")
+for node in downwards[:-1]:
+    print(f"Analizando el dispositivo {node.name}")
     # Obtenemos los parametros necesarios para computar
     # las cantidades del dispositivo
-    input_slew = device.parent.device.get_output_slew()
-    load = device.children[0].device.get_input_capacitance()
-    print(f"{device.name} tiene un slew de entrada de {input_slew}" \
+    input_slew = node.parent.device.get_output_slew()
+    load = node.children[0].device.get_input_capacitance()
+    print(f"{node.name} tiene un slew de entrada de {input_slew}" \
             f" y una carga de {load}")
     print(f"Con estos parámetros, el retardo del dispositivo es " \
-            f"de {device.device.get_delay()}")
+            f"de {node.device.get_delay()}")
     # Sumamos el retardo al retardo total
-    total_delay += device.device.get_delay()
+    total_delay += node.device.get_delay()
 
 print(f"El retardo total es {total_delay}")
