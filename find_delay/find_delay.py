@@ -6,7 +6,7 @@ from inverter import Inverter
 from vsource import Vsource
 
 source = Node(name='source', device=Vsource())
-ffd1 = Node(name='ffd1', device=FFD())
+ffd1 = Node(name='ffd1', parent=source, device=FFD())
 line1 = Node(name='line1', parent=ffd1, device=Line())
 inv1 = Node(name='inv1', parent=line1, device=Inverter())
 line2 = Node(name='line2', parent=inv1, device=Line())
