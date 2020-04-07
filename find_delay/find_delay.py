@@ -28,6 +28,10 @@ for device in downwards[:-1]:
     # las cantidades del dispositivo
     input_slew = device.parent.device.get_output_slew()
     load = device.children[0].device.get_input_capacitance()
+    print(f"{device.name} tiene un slew de entrada de {input_slew}" \
+            f" y una carga de {load}")
+    print(f"Con estos parámetros, el retardo del dispositivo es " \
+            f"de {device.device.get_delay()}")
     # Sumamos el retardo al retardo total
     total_delay += device.device.get_delay()
 
