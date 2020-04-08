@@ -1,13 +1,41 @@
 import numpy as np
 from math import e as euler
+import matplotlib.pyplot as plt
 
 
 class RC_line:
-    def __init__(self, R: float, C: float, sections: int, CL: float=0):
+    def __init__(self, R: float, C: float, sections: int, CL: float=0, Vdd: float=1.8):
         self.R = R
         self.C = C
         self.CL = CL
         self.sections = sections
+        self.Vdd = Vdd
+
+    def get_delay(self, input_slew: float, rising_edge: bool) -> float:
+        pade = self.get_pade12()
+        voltage = []
+        time = []
+        for time_step in np.linspace(0, 10*input_slew, 10000):
+            time.append(time_step)
+            voltage_value = self.temp_resp_LH_exp_input_2order_output(\
+                    time_step, input_slew, pade, self.Vdd) if rising_edge \
+            else self.temp_resp_HL_exp_input_2order_output(\
+            time_step, input_slew, pade, self.Vdd)
+            voltage.append(voltage_value)
+        
+        voltage = np.array(voltage)
+        time = np.array(time)
+
+        v_50 = np.max(voltage)*0.5
+        v_ini = 0 if rising_edge else np.max(voltage)*1
+        max_voltage_index = np.argmax(voltage)
+        t_ini = 0 if rising_edge else time[max_voltage_index]
+        t_50 = time[np.min(np.nonzero(voltage >= v_50))] if rising_edge else \
+        time[max_voltage_index+np.max(np.nonzero(voltage[max_voltage_index:] >= v_50))]
+        plt.plot(time, voltage)
+        plt.show()
+
+        return t_50 - t_ini
 
     def get_moments(self, max_moment: int) -> np.array:
         """ 
@@ -70,6 +98,7 @@ class RC_line:
         return C1, C2, R
 
     def get_pade12(self):
+        # para flanco ascendete
         """ --> Obtiene la aproximacion de Pade [1/2] de la respuesta en frecuencia
         de la linea a partir los momentos m0, m1, m2 y m3
         --> La transferencia a hallar es:
@@ -102,6 +131,7 @@ class RC_line:
         return [A, z, p1, p2]
         
     def get_pade22(self):
+        # para flanco descendente
         """ --> Obtiene la aproximacion de Pade [2/2] de la respuesta en frecuencia
         de la linea a partir los momentos m0, m1, m2 y m3
         --> La transferencia a hallar es:
@@ -304,16 +334,18 @@ class RC_line:
 
 if __name__ == "__main__":
     # Cantidad de cuadripolos/resitencias/capacitores
-    N = 4 
-    # Hasta que momento queremos calcular
-    M = 3
+    N = 20 
+    # parametros de la línea, res y cap por unidad de long, y longitud
+    c = 30e-18*1e6+40e-18 
+    r = 0.1*1e6
+
+    # largo de la línea
+    L = 50e-6
     # Resistencia y capacidad de cada elemento
-    R = 1
-    C = 1
+    R = r*L
+    C = c*L
     # Capacidad de carga
     CL = 0
 
     RC = RC_line(R, C, N, CL)
-    print(RC.get_moments(M))
-    print(RC.get_pi_model())
-
+    print(RC.get_delay(100e-12, False))
