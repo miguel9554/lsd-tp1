@@ -58,8 +58,7 @@ class Estimador:
         for i in range(len(self.tabla_timing)):
             self.tabla_timing[i] = [float(j) for j in self.tabla_timing[i]]            
             
-            
-            
+
     def estimar_retardo_rise(self):
             
         ## Obtener estimacion de Rd en base a la capacidad y retardos de entrada
@@ -76,7 +75,6 @@ class Estimador:
         
         ## Comenzar a iterar hasta llegar al umbral
         error_relativo = 1;
-        print(CL)
         print("\nComienza el bucle\n")
         while error_relativo > self.umbral_err:
             print("Siguiente iteracion")

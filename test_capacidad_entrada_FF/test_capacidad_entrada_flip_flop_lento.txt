@@ -1,0 +1,37 @@
+******************************************************
+**** Script en NUTMEG para ser llamado por Python ****
+
+** Descripcion: obtiene el rise time y el fall time
+** de un flip-flop y
+** lo guarda en los archivos:
+** --> rise_time_Cin_inversor.txt
+** --> fall_time_Cin_inversor.txt
+
+
+.control
+* Cargar circuito
+source test_capacidad_entrada_flip_flop_lento.cir
+
+* Configurar el formato con el que se
+* guardaran los datos de salida
+set noprintheader
+set noprintindex
+set nobreak
+
+**********************
+** Rise Time *****
+**********************
+tran 0.1p 6n 0.5n
+* Guardar resultados
+print v(2) > rise_time_Cin_FF.txt
+
+**********************
+** Fall Time *****
+**********************
+tran 0.1p 7.5n 5.5n
+
+* Guardar resultados
+print v(2) > fall_time_Cin_FF.txt
+
+.endc
+.end

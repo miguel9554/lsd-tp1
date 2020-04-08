@@ -1,0 +1,24 @@
+******************************************************
+**** Script en NUTMEG para ser llamado por Python ****
+
+** Descripcion: simula los flancos LH y HL del FFD
+** al producirse un flanco ascendente de reloj
+
+.control
+* Cargar circuito
+source test_retardo_inversor_cargado.cir
+
+* Configurar el formato con el que se
+* guardaran los datos de salida
+set noprintheader
+set noprintindex
+set nobreak
+
+
+tran 1p 9n 0n
+
+* Guardar resultados
+plot v(49)
+
+.endc
+.end
