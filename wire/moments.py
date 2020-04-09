@@ -65,44 +65,59 @@ class RC_line:
         que repreenta la corriente por la fuente de tensión.
         A esta se le cambio el signo con respecto al ejemplo de la página 47.
         """
-        # Construimos el vector de capacidades, representa la capacidad conectada
-        # a cada nodo. C para todos los nodos, salvo el último que tiene CL en paralelo
-        capacitances = np.ones(self.sections)*self.C
-        capacitances[self.sections-1] = self.C + self.CL
 
-        # Vector de resistencias, representa la resistencia entre los nodos i-1 e i
-        # Vale R para todos los nodos
-        resistances = np.ones(self.sections)*self.R
+        # El vector de estados consiste de las N+1 tensiones de nodos
+        # (N es la cantidad de cuadripolos de la línea), y en la última
+        # posición la corriente de la fuente
+        state_vector_length = self.sections + 2
+
+        # Construimos el vector de excitaciones
+        # Es igual al de estados, salvo que la última posición es la tensión
+        # de la fuente, y no la corriente
+        # Este vector representa una única excitación consistenten de una
+        #delta temporal de tensión en la fuente
+        E = np.zeros(state_vector_length)
+        E[state_vector_length-1] = 1
+
+        # Conductancia y capacidad por cuadripolo
+        g = 1/(self.R*self.sections)
+        c = self.C/self.sections
+        # Construimos la matriz de conductancias
+        G = np.zeros((state_vector_length, state_vector_length))
+        for column in range(G.shape[0]-1):
+            for row in range(G.shape[0]-1):
+                if row == column:
+                    if row == 0 or row == G.shape[0]-2:
+                        G[row, column] = g
+                    else:
+                        G[row, column] = 2*g
+                elif abs(row - column) == 1:
+                    G[row, column] = -g
+                else:
+                    continue
+        G[G.shape[0]-1, 0] = 1
+        G[0, G.shape[1]-1] = 1
+
+        # Construimos la matriz de capacidades
+        C = np.zeros((state_vector_length, state_vector_length))
+        for column in range(C.shape[0]-1):
+            for row in range(C.shape[0]-1):
+                if (row == column) and (row != 0):
+                    C[row, column] = c+CL if row == C.shape[0]-2 else c
+                else:
+                    continue
 
         # Inicializamos la matriz de momentos en cero
-        state_vector_length = self.sections + 2
         moments = np.zeros((state_vector_length, max_moment+1))
 
-        # Los momentos de órden 0 son tensiones unitarias y corriente nula
-        moments[:state_vector_length-1, 0] = np.ones(state_vector_length-1)
-
-        for order in range (1, max_moment+1):
-            # La última variable del vector de momentos es la corriente que circula por la fuente de tensión
-            # Esta corriente es la suma (con signo cambiado) de todas las corrientes de las fuentes de corriente
-            # Cada una de estas fuentes de corriente tiene como valor la tensión del nodo en la iteración anterior
-            # multiplicada por la capacidad del nodo. Es decir, el producto escalar entre el vector de tensiones 
-            # y el vector de capacidades
-            last_iteration_node_voltages = moments[1:state_vector_length-1, order-1]
-            voltage_source_current = np.dot(last_iteration_node_voltages, capacitances)
-            moments[state_vector_length-1, order] = voltage_source_current
-            # Ahora, computamos la tensión de cada nodo
-            for i in range(1, state_vector_length-1):
-                # La tensión del nodo será la tensión del nodo anterior MAS la tensión que cae sobre el resistor
-                # que une los nodos
-                # La corriente es la suma de todas las fuentes de corriente a la derecha del resistor
-                # Cada fuente de corriente vale C*m_i-1(V), es decir, la tensión del momento anterior
-                # multiplicada por la capacidad.
-                I = np.dot(last_iteration_node_voltages[i-1:], capacitances[i-1:])
-                # La tensión del nodo (el momento) será la suma del nodo ya calculado y la tensión
-                # que cae en el resistor (I*R)
-                moments[i, order] = moments[i-1, order] - resistances[i-1]*I
-
+        invG = np.linalg.inv(G)
+        moments[:,0] = invG.dot(E)
+        for moment_order in range(1, max_moment+1):
+            moments[:, moment_order] = invG.dot(-C.dot(moments[:, moment_order-1]))
+        
+        moments[moments.shape[0]-1, :] *= -1
         return moments
+
 
     def get_pi_model(self):
         """ Devuelve el modelo pi, se sigue la nomenclatura de la página 79 """
@@ -351,19 +366,21 @@ class RC_line:
 
 if __name__ == "__main__":
     # Cantidad de cuadripolos/resitencias/capacitores
-    N = 20 
-    # parametros de la línea, res y cap por unidad de long, y longitud
-    c = 30e-18*1e6+40e-18 
-    r = 0.1*1e6
-
-    # largo de la línea
-    L = 50e-6
-    # Resistencia y capacidad de cada elemento
-    R = r*L
-    C = c*L
+    N = 4
+    R = 1/N
+    C = N
     # Capacidad de carga
     CL = 0
 
     RC = RC_line(R, C, N, CL)
-    output_slew, delay = RC.get_output_parameters(100e-12, False, True)
-    print(f"El slew es de {output_slew} y el delay de {delay}")
+    print(RC.get_moments_matrix(3))
+
+    # Cantidad de cuadripolos/resitencias/capacitores
+    N = 4
+    R = 1
+    C = 1
+    # Capacidad de carga
+    CL = 0
+
+    RC = RC_line(R, C, N, CL)
+    print(RC.get_moments(3))
