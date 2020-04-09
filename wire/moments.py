@@ -11,7 +11,20 @@ class RC_line:
         self.sections = sections
         self.Vdd = Vdd
 
-    def get_delay(self, input_slew: float, rising_edge: bool) -> float:
+    def get_50_percent_time(self, time: list, voltage: list, rising_edge: bool):
+        voltage = np.array(voltage)
+        time = np.array(time)
+
+        v_50 = np.max(voltage)*0.5
+        v_ini = 0 if rising_edge else np.max(voltage)*1
+        max_voltage_index = np.argmax(voltage)
+        t_ini = 0 if rising_edge else time[max_voltage_index]
+        t_50 = time[np.min(np.nonzero(voltage >= v_50))] if rising_edge else \
+        time[max_voltage_index+np.max(np.nonzero(voltage[max_voltage_index:] >= v_50))]
+
+        return t_50 - t_ini
+
+    def get_slew(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
         pade = self.get_pade12()
         voltage = []
         time = []
@@ -23,19 +36,23 @@ class RC_line:
             time_step, input_slew, pade, self.Vdd)
             voltage.append(voltage_value)
         
-        voltage = np.array(voltage)
-        time = np.array(time)
+        if plot:
+            plt.plot(time, voltage, label='Salida')
+            plt.plot(time, self.Vdd*np.exp(-np.array(time)/input_slew), label='Entrada')
+            plt.legend()
+            plt.ylabel('Tensión [V]')
+            plt.xlabel('Tiempo [s]')
+            plt.title('Entrada y salida de la línea')
+            plt.show()
 
-        v_50 = np.max(voltage)*0.5
-        v_ini = 0 if rising_edge else np.max(voltage)*1
-        max_voltage_index = np.argmax(voltage)
-        t_ini = 0 if rising_edge else time[max_voltage_index]
-        t_50 = time[np.min(np.nonzero(voltage >= v_50))] if rising_edge else \
-        time[max_voltage_index+np.max(np.nonzero(voltage[max_voltage_index:] >= v_50))]
-        plt.plot(time, voltage)
-        plt.show()
+        return self.get_50_percent_time(time, voltage, rising_edge)
 
-        return t_50 - t_ini
+
+    def get_output_parameters(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
+        input_50_percent_time = input_slew*np.log(input_slew)
+        output_slew = self.get_slew(input_slew, rising_edge, plot)
+        delay = output_slew - input_50_percent_time
+        return output_slew, delay
 
     def get_moments(self, max_moment: int) -> np.array:
         """ 
@@ -348,4 +365,5 @@ if __name__ == "__main__":
     CL = 0
 
     RC = RC_line(R, C, N, CL)
-    print(RC.get_delay(100e-12, False))
+    output_slew, delay = RC.get_output_parameters(100e-12, False, True)
+    print(f"El slew es de {output_slew} y el delay de {delay}")
