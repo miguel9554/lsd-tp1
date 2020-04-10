@@ -4,9 +4,10 @@ from Estimador import Estimador
 from line import Line
 
 
-class Inverter(device.Device):
+class TableDevice(device.Device):
 
-    def __init__(self, c_in, vdd, error_threshold, table_path: pathlib.Path = None):
+    def __init__(self, table_path: pathlib.Path, c_in=3.1e-15, vdd=1.8, \
+            error_threshold=1e-3):
         self.table_path = table_path
         self.c_in = c_in # Esta capacidad es de 3.1fF
         self.vdd = vdd
