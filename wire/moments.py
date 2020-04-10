@@ -373,14 +373,4 @@ if __name__ == "__main__":
     CL = 0
 
     RC = RC_line(R, C, N, CL)
-    print(RC.get_moments_matrix(3))
-
-    # Cantidad de cuadripolos/resitencias/capacitores
-    N = 4
-    R = 1
-    C = 1
-    # Capacidad de carga
-    CL = 0
-
-    RC = RC_line(R, C, N, CL)
     print(RC.get_moments(3))
