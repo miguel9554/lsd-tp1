@@ -119,6 +119,50 @@ class RC_tree:
         return moments
 
 
+    def get_pi_model(self):
+        """ Devuelve el modelo pi, se sigue la nomenclatura de la página 79 """
+        line_moments = self.get_moments(3)
+        current_moments = line_moments[line_moments.shape[0]-1, :]
+        C1 = current_moments[2]**2/current_moments[3]
+        C2 = current_moments[1] - current_moments[2]**2/current_moments[3]
+        R = -(current_moments[3]**2)/(current_moments[2]**3)
+
+        return C1, C2, R
+
+
+    def get_pade12(self):
+        # para flanco ascendete
+        """ --> Obtiene la aproximacion de Pade [1/2] de la respuesta en frecuencia
+        de la linea a partir los momentos m0, m1, m2 y m3
+        --> La transferencia a hallar es:
+        H(s) = (a0 + a1*s)/(1 + b1*s b1*s^2)}
+        --> Devuelve el cero, los dos polos y la constante multiplicativa (A)
+        de la siguiente expresion:
+        H(s) = A*(s + z)/((s + p1)*(s + p2)) """
+        
+        # Obtener los momentos de la tension en el ultimo nodo de la linea,
+        # que seria la entrada del siguiente inversor/flip-flop
+        #print(self.get_moments(3))
+        [m0,m1,m2,m3] = self.get_moments(3)[-2]
+        #print("Momentos:")
+        #print([m0,m1,m2,m3])
+        # Obtener los coeficientes de la transferencia
+        b2 = (-m2**2 + m1*m3)/(m0*m2 - m1**2)
+        b1 = (m1*m2 - m0*m3)/(m0*m2 - m1**2)
+        a0 = m0
+        a1 = m1 + m0*b1
+        
+        #print("Constantes transferencia:")
+        #print([a0, a1, b1, b2])
+        
+        # Obtener polos, cero y constante multiplicativa
+        z = a0/a1
+        A = a1/b2
+        p1 = -(-(b1/b2) + ((b1/b2)**2 - 4/b2)**0.5)/2
+        p2 = -(-(b1/b2) - ((b1/b2)**2 - 4/b2)**0.5)/2
+        
+        return [A, z, p1, p2]
+        
 def main():
     # Cantidad de cuadripolos/resitencias/capacitores
     N1 = 20
@@ -135,7 +179,7 @@ def main():
 
     tree = RC_tree(RC_line(R1, C1, N1, CL),\
             RC_line(R2, C2, N2, CL), RC_line(R3, C3, N3, CL))
-    print(tree.get_moments(3))
+    print(tree.get_pi_model())
 
 if __name__ == "__main__":
     main()
