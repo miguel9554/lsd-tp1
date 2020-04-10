@@ -1,5 +1,7 @@
 import numpy as np
+from math import e as euler
 from moments import RC_line
+import matplotlib.pyplot as plt
 
 
 class RC_tree:
@@ -130,7 +132,99 @@ class RC_tree:
         return C1, C2, R
 
 
-    def get_pade12(self):
+    def get_output_parameters(self, line_number: int, input_slew: float, \
+            rising_edge: bool, plot: bool = False) -> float:
+        if line_number not in [1, 2]:
+            raise Exception('El número de línea tiene que ser 1 o 2')
+        input_50_percent_time = input_slew*np.log(input_slew)
+        output_slew = self.get_slew(line_number, input_slew, rising_edge, plot)
+        delay = output_slew - input_50_percent_time
+        return output_slew, delay
+
+
+    def temp_resp_LH_exp_input_2order_output(self, t, tau_in, line_transf, Vdd):
+        """ Calcular la respuesta temporal a la salida de la linea para:
+        --> Entrada de forma exponencial con constante de tiempo tau_in
+        --> Tension de salida de la linea representada por la siguiente transferencia:
+        H(s) = D*(s + z)/((s + p2)*(s + p3)) 
+        --> Flanco ascendente
+        Recibe: line_transf = [A,z,p1,p2]"""
+    
+        p1 = 1/tau_in # Polo de la dseñal de entrada
+        [D, z, p2, p3] = line_transf
+        
+        aux_matrix = np.array([ [1,1,1], [p2+p3 , p1+p3, p1+p2], [p2*p3, p1*p3, p1*p2] ])
+        aux_matrix = np.linalg.inv(aux_matrix)
+        aux_vect = np.array([0,1,z])
+        [A, B, C] = np.dot(aux_matrix,aux_vect)
+        return Vdd*D*p1*((A/p1)*(1 - euler**(-p1*t)) + (B/p2)*(1 - euler**(-p2*t)) + (C/p3)*(1 - euler**(-p3*t)))
+
+
+    def temp_resp_HL_exp_input_2order_output(self, t, tau_in, line_transf, Vdd):
+        """ Calcular la respuesta temporal a la salida de la linea para:
+        --> Entrada de forma exponencial con constante de tiempo tau_in
+        --> Tension de salida de la linea representada por la siguiente transferencia:
+        H(s) = D*(s + z)/((s + p2)*(s + p3)) 
+        --> Flanco descendente
+        Recibe: line_transf = [A,z,p1,p2] """
+    
+        p1 = 1/tau_in # Polo de la dseñal de entrada
+        [D, z, p2, p3] = line_transf
+
+        aux_matrix = np.array([ [1,1,1], [p2+p3 , p1+p3, p1+p2], [p2*p3, p1*p3, p1*p2] ])
+        aux_matrix = np.linalg.inv(aux_matrix)
+        aux_vect = np.array([0,1,z])
+        [A, B, C] = np.dot(aux_matrix,aux_vect)
+        
+        return Vdd*D*(A*euler**(-p1*t) + B*euler**(-p2*t) + C*euler**(-p3*t))
+
+
+    def get_slew(self, line_number: int, input_slew: float, rising_edge: bool, \
+            plot: bool = False) -> float:
+
+        pade = self.get_pade12(line_number)
+        voltage = []
+        time = []
+        for time_step in np.linspace(0, 10*input_slew, 10000):
+            time.append(time_step)
+            voltage_value = self.temp_resp_LH_exp_input_2order_output(\
+                    time_step, input_slew, pade, self.Vdd) if rising_edge \
+            else self.temp_resp_HL_exp_input_2order_output(\
+            time_step, input_slew, pade, self.Vdd)
+            voltage.append(voltage_value)
+        
+        if plot:
+            plt.plot(time, voltage, label='Salida')
+            if rising_edge:
+                plt.plot(time, self.Vdd*(1-np.exp(-np.array(time)/input_slew)), \
+                        label='Entrada')
+            else:
+                plt.plot(time, self.Vdd*np.exp(-np.array(time)/input_slew), \
+                        label='Entrada')
+            plt.legend()
+            plt.ylabel('Tensión [V]')
+            plt.xlabel('Tiempo [s]')
+            plt.title('Entrada y salida de la línea')
+            plt.show()
+
+        return self.get_50_percent_time(time, voltage, rising_edge)
+
+
+    def get_50_percent_time(self, time: list, voltage: list, rising_edge: bool):
+        voltage = np.array(voltage)
+        time = np.array(time)
+
+        v_50 = np.max(voltage)*0.5
+        v_ini = 0 if rising_edge else np.max(voltage)*1
+        max_voltage_index = np.argmax(voltage)
+        t_ini = 0 if rising_edge else time[max_voltage_index]
+        t_50 = time[np.min(np.nonzero(voltage >= v_50))] if rising_edge else \
+        time[max_voltage_index+np.max(np.nonzero(voltage[max_voltage_index:] >= v_50))]
+
+        return t_50 - t_ini
+
+
+    def get_pade12(self, line_number: int):
         # para flanco ascendete
         """ --> Obtiene la aproximacion de Pade [1/2] de la respuesta en frecuencia
         de la linea a partir los momentos m0, m1, m2 y m3
@@ -143,7 +237,15 @@ class RC_tree:
         # Obtener los momentos de la tension en el ultimo nodo de la linea,
         # que seria la entrada del siguiente inversor/flip-flop
         #print(self.get_moments(3))
-        [m0,m1,m2,m3] = self.get_moments(3)[-2]
+        if line_number == 1:
+            node_number = self.line1.sections + self.line2.sections
+            [m0, m1, m2, m3] = self.get_moments(3)[node_number, :]
+        else:
+            node_number = self.line1.sections + self.line2.sections + \
+                    self.line3.sections
+            [m0, m1, m2, m3] = self.get_moments(3)[node_number, :]
+
+                    
         #print("Momentos:")
         #print([m0,m1,m2,m3])
         # Obtener los coeficientes de la transferencia
@@ -165,21 +267,32 @@ class RC_tree:
         
 def main():
     # Cantidad de cuadripolos/resitencias/capacitores
-    N1 = 20
-    N2 = 20
-    N3 = 20
-    R1 = 1/N1
-    R2 = 1/N2
-    R3 = 1/N3
-    C1 = N1
-    C2 = N2
-    C3 = N3
+    N = 20
+    N1 = N
+    N2 = N
+    N3 = N
+    # Parametros de la línea, res y cap por unidad de long
+    c = 30e-18*1e6+40e-18 
+    r = 0.1*1e6
+
+    # Largo de cada línea
+    L1 = 20e-6
+    L2 = 30e-16
+    L3 = 60e-6
+
+    # Capacidades y resistencia de cada línea
+    R1 = r*L1
+    R2 = r*L2
+    R3 = r*L3
+    C1 = c*L1
+    C2 = c*L2
+    C3 = c*L3
     # Capacidad de carga
     CL = 0
 
     tree = RC_tree(RC_line(R1, C1, N1, CL),\
             RC_line(R2, C2, N2, CL), RC_line(R3, C3, N3, CL))
-    print(tree.get_pi_model())
+    print(tree.get_output_parameters(1, 100e-13, True, True))
 
 if __name__ == "__main__":
     main()
