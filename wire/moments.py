@@ -4,12 +4,15 @@ import matplotlib.pyplot as plt
 
 
 class RC_line:
-    def __init__(self, R: float, C: float, sections: int, CL: float=0, Vdd: float=1.8):
+    def __init__(self, R: float, C: float, sections: int = 20, CL: float=0, Vdd: float=1.8):
         self.R = R
         self.C = C
         self.CL = CL
         self.sections = sections
         self.Vdd = Vdd
+
+    def set_CL(self, CL):
+        self.CL = CL
 
     def get_50_percent_time(self, time: list, voltage: list, rising_edge: bool):
         voltage = np.array(voltage)
@@ -103,7 +106,7 @@ class RC_line:
         for column in range(C.shape[0]-1):
             for row in range(C.shape[0]-1):
                 if (row == column) and (row != 0):
-                    C[row, column] = c+CL if row == C.shape[0]-2 else c
+                    C[row, column] = c+self.CL if row == C.shape[0]-2 else c
                 else:
                     continue
 
