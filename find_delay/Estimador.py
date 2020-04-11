@@ -13,6 +13,8 @@ from scipy.optimize import root as newton_raphson_multivariable
 from math import e as euler
 from numpy import log as ln
 import numpy as np
+import sys
+import os
 
 #############################
 
@@ -34,11 +36,13 @@ import numpy as np
 #                 Por ejemplo: umbral_err = 0.001 para considerar que hubo
 #                 convergencia cuando la diferencia entre el resultado de una iteración (N) y la precendente (N-1) es menor
 #                 al 0.1% del valor de la iteracion N-1
+# --> debug: True para que imprima información sobre el proceso
 
 
 class Estimador:
 
-    def __init__(self, modelo_pi, Tau_in, Vdd, nombre_tabla_timing, umbral_err):
+    def __init__(self, modelo_pi, Tau_in, Vdd, nombre_tabla_timing, umbral_err, \
+            debug: bool = False):
         
         [self.C2, self.C1, self.R] = modelo_pi
        
@@ -58,11 +62,13 @@ class Estimador:
         
         for i in range(len(self.tabla_timing)):
             self.tabla_timing[i] = [float(j) for j in self.tabla_timing[i]]            
+
+        self.output_stream = sys.stdout if debug else open(os.devnull, 'w')
             
 
     def estimar_retardo_rise(self):
         
-        print("### Estimando retardo ### ")
+        print("### Estimando retardo ### ", file=self.output_stream)
          
         ## Se comienza por obtener los valores semillas para el proceso iterativo
         
@@ -101,13 +107,13 @@ class Estimador:
         ## Comenzar a iterar hasta llegar al umbral
         error_relativo = 1;
         while error_relativo > self.umbral_err:
-            print("--> Siguiente iteracion <--")
+            print("--> Siguiente iteracion <--", file=self.output_stream)
             # Resolver la capacidad equivalente a partir de
             # igualar las corrientes del modelo pi y del modelo
             # RC equivalente
             CL = newton_raphson(self.i_promedio_newton_raphson, CL, self.derivada_i_promedio_newton_raphson, args=[delta_t, Rd, self.C1, self.R, self.C2], tol=0.05E-15, maxiter=10);
             
-            #print("Termino NR para corrientes")
+            #print("Termino NR para corrientes", file=self.output_stream)
 
             # Buscar en la tabla del FF o del inversor
             # [t_50, t_20] = buscar_en_tabla_FF(CL);
@@ -117,27 +123,27 @@ class Estimador:
             # Obtener la siguiente iteracion de t0 y delta_t
             t0 = newton_raphson(self.v_o_newton_raphson, t0, self.derivada_v_o_newton_raphson, args=[CL, t_50_sig + self.t_50_in, t_20 + self.t_50_in, Rd, 0.5*self.Vdd, 0.8*self.Vdd]);
             
-            #print("Termino NR para tension")
+            #print("Termino NR para tension", file=self.output_stream)
             
             delta_t = self.delta_t_vs_CL_y_t0(CL, t0, t_50_sig, 0.5*self.Vdd, Rd);
             
-            print("Error relativo de la iteracion:")
+            print("Error relativo de la iteracion:", file=self.output_stream)
             error_relativo = (t_50_sig - t_50)/t_50
             t_50 = t_50_sig
             if error_relativo < 0:
                 error_relativo = -error_relativo
             
-            print(error_relativo)
-            print('\n')
+            print(error_relativo, file=self.output_stream)
+            print('\n', file=self.output_stream)
         # Fin de la iteracion
         #####################
         
-        print("### Fin de la estimacion ###")
-        #print("Resultados:")
-        #print("CL: ")
-        #print(CL)
-        #print("t_50: ")    
-        #print(t_50)
+        print("### Fin de la estimacion ###", file=self.output_stream)
+        #print("Resultados:", file=self.output_stream)
+        #print("CL: ", file=self.output_stream)
+        #print(CL, file=self.output_stream)
+        #print("t_50: ", file=self.output_stream)
+        #print(t_50, file=self.output_stream)
         
         return [CL, t_50, t_LH]
         
@@ -182,16 +188,16 @@ class Estimador:
         ## Comenzar a iterar hasta llegar al umbral
         error_relativo = 1;
 
-        print("\nComienza el bucle\n")
+        print("\nComienza el bucle\n", file=self.output_stream)
         while error_relativo > self.umbral_err:
-            print("Siguiente iteracion")
+            print("Siguiente iteracion", file=self.output_stream)
             
             # Resolver la capacidad equivalente a partir de
             # igualar las corrientes del modelo pi y del modelo
             # RC equivalente
             CL = newton_raphson(self.i_promedio_newton_raphson, CL, self.derivada_i_promedio_newton_raphson, args=[delta_t, Rd, self.C1, self.R, self.C2], tol=0.05E-15, maxiter=10);
             
-            print("Termino NR para corrientes")
+            print("Termino NR para corrientes", file=self.output_stream)
 
             # Buscar en la tabla del FF o del inversor
             # [t_50, t_20] = buscar_en_tabla_FF(CL);
@@ -201,24 +207,24 @@ class Estimador:
             sol = newton_raphson_multivariable(self.v_o_newton_raphson_fall_time, [t0, delta_t], jac=self.jacobiano_v_o_newton_raphson, args=(CL, t_50_sig + self.t_50_in, t_20 + self.t_50_in, Rd, 0.5*self.Vdd, 0.2*self.Vdd));
             [t0, delta_t] = sol.x
             
-            print("Termino NR para tension")
+            print("Termino NR para tension", file=self.output_stream)
             
-            print("Calcular error relativo:")
+            print("Calcular error relativo:", file=self.output_stream)
             error_relativo = (t_50_sig - t_50)/t_50
             t_50 = t_50_sig
             if error_relativo < 0:
                 error_relativo = -error_relativo
             
-            print(error_relativo)
-            print('\n')
+            print(error_relativo, file=self.output_stream)
+            print('\n', file=self.output_stream)
         # Fin de la iteracion
         #####################
         
-        #print("Resultados:")
-        #print("CL: ")
-        #print(CL)
-        #print("t_50: ")    
-        #print(t_50)
+        #print("Resultados:", file=self.output_stream)
+        #print("CL: ", file=self.output_stream)
+        #print(CL, file=self.output_stream)
+        #print("t_50: ", file=self.output_stream)
+        #print(t_50, file=self.output_stream)
         
         return [CL, t_50, t_HL]
         
@@ -278,14 +284,14 @@ class Estimador:
         wp1 = -(-b_coef - (b_coef**2 - 4*a_coef*c_coef)**(0.5))/(2*a_coef)
         wp2 = -(-b_coef + (b_coef**2 - 4*a_coef*c_coef)**(0.5))/(2*a_coef)
         
-        #print("wz:")
-        #print(wz)
+        #print("wz:", file=self.output_stream)
+        #print(wz, file=self.output_stream)
 
-        #print("wp1:")
-        #print(wp1)
+        #print("wp1:", file=self.output_stream)
+        #print(wp1, file=self.output_stream)
         
-        #print("wp2:")
-        #print(wp2)
+        #print("wp2:", file=self.output_stream)
+        #print(wp2, file=self.output_stream)
         
         
         if wp2 < wp1:

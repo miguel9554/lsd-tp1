@@ -51,11 +51,15 @@ class RC_line:
         return self.get_50_percent_time(time, voltage, rising_edge)
 
 
-    def get_output_parameters(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
+    def get_output_slew(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
+        return self.get_slew(input_slew, rising_edge, plot)
+
+
+    def get_delay(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
         input_50_percent_time = input_slew*np.log(input_slew)
         output_slew = self.get_slew(input_slew, rising_edge, plot)
         delay = output_slew - input_50_percent_time
-        return output_slew, delay
+        return delay
 
     def get_moments(self, max_moment: int) -> np.array:
         """ 
