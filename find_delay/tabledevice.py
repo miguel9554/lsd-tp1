@@ -12,11 +12,16 @@ class TableDevice(device.Device):
         self.c_in = c_in # Esta capacidad es de 3.1fF
         self.vdd = vdd
         self.error_threshold = error_threshold 
+        self.connected_device = None
         
         
-    def get_delay(self, input_slew: float, connected_device, rising_edge : bool) -> float:
+    def set_connected_device(self, connected_device):
+        self.connected_device = connected_device
+
+
+    def get_delay(self, input_slew: float, rising_edge : bool) -> float:
         if not ((hasattr(self, "delay_rise") and rising_edge) or (hasattr(self, "delay_fall") and not rising_edge)):
-            estimador = Estimador(connected_device, input_slew/0.69, self.vdd, self.table_path, self.error_threshold)
+            estimador = Estimador(self.connected_device.get_pi_model(), input_slew/0.69, self.vdd, self.table_path, self.error_threshold)
             if rising_edge:
                 [self.load_ceff, self.slew_rise, self.delay_rise] = estimador.estimar_retardo_rise()
                 return self.delay_rise
@@ -35,7 +40,7 @@ class TableDevice(device.Device):
 
     def get_output_slew(self, input_slew: float, load) -> float:
         if not ((hasattr(self, "slew_rise") and rising_edge) or (hasattr(self, "slew_fall") and not rising_edge)):
-            estimador = Estimador(connected_device.pi_model, input_slew, self.vdd, self.table_path, self.error_threshold)
+            estimador = Estimador(self.connected_device.pi_model(), input_slew, self.vdd, self.table_path, self.error_threshold)
             if slope:
                 [self.load_ceff, self.slew_rise, self.delay_rise] = estimador.estimar_retardo_rise()
                 return self.slew_rise
