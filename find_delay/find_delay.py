@@ -126,6 +126,7 @@ line11.set_delay(inv11.output_slew, urising_edge)
 line11.set_slew(inv11.output_slew, urising_edge)
 line11.print_status('line11')
 
+# Se rompe por la carga nula
 #ffd11.set_delay(line11.output_slew, urising_edge)
 #ffd11.print_status('ffd11')
 
@@ -152,5 +153,6 @@ line22.set_delay(inv22.output_slew, lrising_edge)
 line22.set_slew(inv22.output_slew, lrising_edge)
 line22.print_status('line22')
 
+# Se rompe por la carga nula
 #ffd21.set_delay(line22.output_slew, lrising_edge)
 #ffd21.print_status('ffd21')
