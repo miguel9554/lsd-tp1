@@ -131,15 +131,21 @@ class RC_tree:
 
         return C1, C2, R
 
-
-    def get_output_parameters(self, line_number: int, input_slew: float, \
+    def get_delay(self, input_slew: float, line_number: int, \
             rising_edge: bool, plot: bool = False) -> float:
         if line_number not in [1, 2]:
             raise Exception('El número de línea tiene que ser 1 o 2')
         input_50_percent_time = input_slew*np.log(input_slew)
         output_slew = self.get_slew(line_number, input_slew, rising_edge, plot)
         delay = output_slew - input_50_percent_time
-        return output_slew, delay
+        return delay
+
+    def get_output_slew(self, input_slew: float, line_number: int,\
+            rising_edge: bool, plot: bool = False) -> float:
+        if line_number not in [1, 2]:
+            raise Exception('El número de línea tiene que ser 1 o 2')
+        output_slew = self.get_slew(line_number, input_slew, rising_edge, plot)
+        return output_slew
 
 
     def temp_resp_LH_exp_input_2order_output(self, t, tau_in, line_transf, Vdd):
@@ -292,7 +298,9 @@ def main():
 
     tree = RC_tree(RC_line(R1, C1, N1, CL),\
             RC_line(R2, C2, N2, CL), RC_line(R3, C3, N3, CL))
-    print(tree.get_output_parameters(1, 100e-13, True, True))
+    delay = tree.get_delay(100e-13, 1, True, True)
+    slew = tree.get_output_slew(100e-13, 1, True, True)
+    print(f"El delay es de {delay} y el slew de {slew}")
 
 if __name__ == "__main__":
     main()
