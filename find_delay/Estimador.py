@@ -40,7 +40,8 @@ class Estimador:
 
     def __init__(self, modelo_pi, Tau_in, Vdd, nombre_tabla_timing, umbral_err):
         
-        [self.R, self.C1, self.C2] = modelo_pi
+        [self.C2, self.C1, self.R] = modelo_pi
+       
         
         self.Vdd = Vdd
         self.umbral_err = umbral_err
@@ -60,30 +61,53 @@ class Estimador:
             
 
     def estimar_retardo_rise(self):
+        
+        print("### Estimando retardo ### ")
+         
+        ## Se comienza por obtener los valores semillas para el proceso iterativo
+        
+        ########################################################################
+        # METODO 1: obtenido del paper de Pillegi 1996
+        if ((self.C1 + self.C2) < self.tabla_timing[-1][0]):
+            CL = self.C1 + self.C2
+        else:
+            CL = self.tabla_timing[-1][0]
             
-        ## Obtener estimacion de Rd en base a la capacidad y retardos de entrada
-        ## mas altos posibles para el inversor o FF que va a ser el "driver" de la linea
-        CL = self.tabla_timing[-1][0]
-        t_90 = -(self.tabla_timing[-1][2]/2.2)*ln(0.1); # Extraccion de tiempos de interes a partir del RISE TIME
-        t_50 = -(self.tabla_timing[-1][2]/2.2)*ln(0.5); # Extraccion de tiempos de interes a partir del RISE TIME
-        t_20 = -(self.tabla_timing[-1][2]/2.2)*ln(0.8); # Extraccion de tiempos de interes a partir del RISE TIME
+        [t_50, t_20, t_delay] = self.buscar_en_tabla(self.tabla_timing, CL, self.Tau_in, True)     
+        t_90 = -(t_50/ln(2))*ln(0.1)
+        
         Rd = (t_90 - t_50)/(CL*ln(5));
         
+        delta_t = (10/3)*(t_50 - t_20)
+        t0 = t_50 - 0.69*Rd*CL - delta_t/2 ### NOTA: OBSERVAR QUE ESTE VALOR ES NEGATIVO, PERO NO PARECIERA
+                                           ### PERJUDICAR LA CONVERGENCIA 
+        ########################################################################
+         
+        ########################################################################    
+        # METODO 2: propio, diverge
+        ## Obtener estimacion de Rd en base a la capacidad y retardos de entrada
+        ## mas altos posibles para el inversor o FF que va a ser el "driver" de la linea
+        #CL = self.tabla_timing[-1][0]
+        #t_90 = -(self.tabla_timing[-1][2]/2.2)*ln(0.1); # Extraccion de tiempos de interes a partir del RISE TIME
+        #t_50 = -(self.tabla_timing[-1][2]/2.2)*ln(0.5); # Extraccion de tiempos de interes a partir del RISE TIME
+        #t_20 = -(self.tabla_timing[-1][2]/2.2)*ln(0.8); # Extraccion de tiempos de interes a partir del RISE TIME
+        #Rd = (t_90 - t_50)/(CL*ln(5));
+        #
         ## Obtener semilla de Delta_t y t_0
-        delta_t = t_90
-        t0 = t_90/10
+        # delta_t = t_90
+        # t0 = t_90/10
+        ########################################################################
         
         ## Comenzar a iterar hasta llegar al umbral
         error_relativo = 1;
-        print("\nComienza el bucle\n")
         while error_relativo > self.umbral_err:
-            print("Siguiente iteracion")
+            print("--> Siguiente iteracion <--")
             # Resolver la capacidad equivalente a partir de
             # igualar las corrientes del modelo pi y del modelo
             # RC equivalente
             CL = newton_raphson(self.i_promedio_newton_raphson, CL, self.derivada_i_promedio_newton_raphson, args=[delta_t, Rd, self.C1, self.R, self.C2], tol=0.05E-15, maxiter=10);
             
-            print("Termino NR para corrientes")
+            #print("Termino NR para corrientes")
 
             # Buscar en la tabla del FF o del inversor
             # [t_50, t_20] = buscar_en_tabla_FF(CL);
@@ -93,11 +117,11 @@ class Estimador:
             # Obtener la siguiente iteracion de t0 y delta_t
             t0 = newton_raphson(self.v_o_newton_raphson, t0, self.derivada_v_o_newton_raphson, args=[CL, t_50_sig + self.t_50_in, t_20 + self.t_50_in, Rd, 0.5*self.Vdd, 0.8*self.Vdd]);
             
-            print("Termino NR para tension")
+            #print("Termino NR para tension")
             
             delta_t = self.delta_t_vs_CL_y_t0(CL, t0, t_50_sig, 0.5*self.Vdd, Rd);
             
-            print("Calcular error relativo:")
+            print("Error relativo de la iteracion:")
             error_relativo = (t_50_sig - t_50)/t_50
             t_50 = t_50_sig
             if error_relativo < 0:
@@ -108,28 +132,49 @@ class Estimador:
         # Fin de la iteracion
         #####################
         
-        print("Resultados:")
-        print("CL: ")
-        print(CL)
-        print("t_50: ")    
-        print(t_50)
+        print("### Fin de la estimacion ###")
+        #print("Resultados:")
+        #print("CL: ")
+        #print(CL)
+        #print("t_50: ")    
+        #print(t_50)
         
         return [CL, t_50, t_LH]
         
 
     def estimar_retardo_fall(self):
+    
+        ########################################################################
+        # METODO 1: obtenido del paper de Pillegi 1996
+        if ((self.C1 + self.C2) < self.tabla_timing[-1][0]):
+            CL = self.C1 + self.C2
+        else:
+            CL = self.tabla_timing[-1][0]
             
-        ## Obtener estimacion de Rd en base a la capacidad y retardos de entrada
-        ## mas altos posibles para el inversor o FF que va a ser el "driver" de la linea
-        CL = self.tabla_timing[-1][0]
-        t_90 = -(self.tabla_timing[-1][3]/2.2)*ln(0.9); # Extraccion de tiempos de interes a partir del RISE TIME
-        t_50 = -(self.tabla_timing[-1][3]/2.2)*ln(0.5); # Extraccion de tiempos de interes a partir del RISE TIME
-        t_20 = -(self.tabla_timing[-1][3]/2.2)*ln(0.2); # Extraccion de tiempos de interes a partir del RISE TIME
+        [t_50, t_20, t_delay] = self.buscar_en_tabla(self.tabla_timing, CL, self.Tau_in, False)     
+        t_90 = -(t_50/ln(2))*ln(0.9)
+        
         Rd = (t_50 - t_90)/(CL*ln(5));
         
+        delta_t = (10/3)*(t_20 - t_50)
+        t0 = t_50 - 0.69*Rd*CL - delta_t/2
+        ########################################################################    
+    
+
+        ########################################################################    
+        # METODO 2: propio, diverge    
+        ## Obtener estimacion de Rd en base a la capacidad y retardos de entrada
+        ## mas altos posibles para el inversor o FF que va a ser el "driver" de la linea
+        #CL = self.tabla_timing[-1][0]
+        #t_90 = -(self.tabla_timing[-1][3]/2.2)*ln(0.9); # Extraccion de tiempos de interes a partir del RISE TIME
+        #t_50 = -(self.tabla_timing[-1][3]/2.2)*ln(0.5); # Extraccion de tiempos de interes a partir del RISE TIME
+        #t_20 = -(self.tabla_timing[-1][3]/2.2)*ln(0.2); # Extraccion de tiempos de interes a partir del RISE TIME
+        #Rd = (t_50 - t_90)/(CL*ln(5));
+        #
         ## Obtener semilla de Delta_t y t_0
-        delta_t = t_90
-        t0 = t_90/10
+        #delta_t = t_90
+        #t0 = t_90/10
+        ########################################################################
         
         ## Comenzar a iterar hasta llegar al umbral
         error_relativo = 1;
@@ -169,11 +214,11 @@ class Estimador:
         # Fin de la iteracion
         #####################
         
-        print("Resultados:")
-        print("CL: ")
-        print(CL)
-        print("t_50: ")    
-        print(t_50)
+        #print("Resultados:")
+        #print("CL: ")
+        #print(CL)
+        #print("t_50: ")    
+        #print(t_50)
         
         return [CL, t_50, t_HL]
         
