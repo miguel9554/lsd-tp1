@@ -11,6 +11,10 @@ class RC_tree:
         self.line3 = line3
         self.Vdd = line1.Vdd
 
+    def set_CL(self, CL: float, line_number: int):
+        if line_number not in [1, 2]:
+            raise Exception('El número de línea tiene que ser 1 o 2')
+        setattr(self, 'line'+str(line_number)+'.CL', CL)
 
     def write_conductance(self, G: np.array, g: float, a: int, b: int) -> np.array:
         """writes a conductance connected between a and b """
