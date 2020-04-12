@@ -1,41 +1,13 @@
 import sys
 sys.path.insert(0, '../wire')
-from tabledevice import TableDevice
-from moments import RC_line
+from tabledevice import Inverter, FFD
+from rc_line import RC_line
 from rc_tree import RC_tree
 from null_load import null_load
+from source import vsource
+from circuit import circuit
+import anytree
 
-
-class Device:
-    def __init__(self, device):
-        self.device = device
-        self.output_slew = None
-        self.delay = None
-    def set_delay(self, input_slew: float, rising_edge: bool, \
-            line_number: int = None) -> float:
-        if line_number:
-            delay = self.device.get_delay(input_slew, line_number, \
-                    rising_edge)
-        else:
-            delay = self.device.get_delay(input_slew, rising_edge)
-        self.delay = delay
-        return delay
-    def set_slew(self, input_slew: float, rising_edge: bool, \
-            line_number: int = None) -> float:
-        if line_number:
-            oslew = self.device.get_output_slew(input_slew, line_number, \
-                    rising_edge)
-        else:
-            oslew = self.device.get_output_slew(input_slew, rising_edge)
-        self.output_slew = oslew
-        return oslew
-    def print_status(self, name: str):
-        print(f"{name} tiene un delay de {self.delay:.2e} y un " \
-                f"slew de {self.output_slew:.2e}")
-
-# Rutas de las talas
-ffd_table = 'tabla_datos_FFD.txt'
-inverter_table = 'tabla_datos_inversor.txt'
 
 # Datos de resistencia y capacidad por unidad de longitud
 # Se suponen líneas de 1 um de ancho
@@ -60,97 +32,32 @@ L22 = 100
 rising_edge = True
 input_slew = 551e-12 if rising_edge else 441e-12
 
-# Declaramos los compoenentes del circuito
-ffd1 = Device(TableDevice(ffd_table))
-line1 = Device(RC_line(r*L1, c*L1))
-inv1 = Device(TableDevice(inverter_table))
-tree_line = Device(RC_tree(RC_line(r*L2, c*L2), RC_line(r*L21, c*L21), \
+# Construimos el árbol que representa al circuito
+# Rama principal
+circuit_tree = anytree.Node(name='source', device=vsource(input_slew, \
+        rising_edge))
+ffd1 = anytree.Node(name='ffd1', parent=circuit_tree, device=FFD())
+line1 = anytree.Node(name='line1', parent=ffd1, device=RC_line(r*L1, c*L1))
+inv1 = anytree.Node(name='inv1', parent=line1, device=Inverter())
+tree_line = anytree.Node(name='tree_line', parent=inv1, \
+        device=RC_tree(RC_line(r*L2, c*L2), RC_line(r*L21, c*L21), \
         RC_line(r*L22, c*L22)))
 # La rama de arriba
-inv11 = Device(TableDevice(inverter_table))
-line11 = Device(RC_line(r*L11, c*L11))
-ffd11 = Device(TableDevice(ffd_table))
-# La rama de abajo
-inv21 = Device(TableDevice(inverter_table))
-line21 = Device(RC_line(r*L21, c*L21))
-inv22 = Device(TableDevice(inverter_table))
-line22 = Device(RC_line(r*L22, c*L22))
-ffd21 = Device(TableDevice(ffd_table))
+inv11 = anytree.Node(name='inv11', parent=tree_line, device=Inverter())
+line11 = anytree.Node(name='line11', parent=inv11, device=RC_line( \
+        r*L11, c*L11))
+ffd11 = anytree.Node(name='ffd11', parent=line11, device=Inverter())
+# Rama de abajo
+inv21 = anytree.Node(name='inv21', parent=tree_line, device=Inverter())
+line21 = anytree.Node(name='line21', parent=inv21, device=RC_line( \
+        r*L21, c*L21))
+inv22 = anytree.Node(name='inv22', parent=line21, device=Inverter())
+line22 = anytree.Node(name='line22', parent=inv22, device=RC_line( \
+        r*L22, c*L22))
+ffd21 = anytree.Node(name='ffd21', parent=line22, device=FFD())
 
-# Definimos la carga de cada componente
-ffd1.device.set_connected_device(line1.device)
-line1.device.set_CL(inv1.device.get_input_capacitance())
-inv1.device.set_connected_device(tree_line.device)
-tree_line.device.set_CL(inv11.device.get_input_capacitance(), 1)
-tree_line.device.set_CL(inv21.device.get_input_capacitance(), 2)
-# La rama de arriba
-inv11.device.set_connected_device(line11.device)
-line11.device.set_CL(ffd11.device.get_input_capacitance())
-ffd11.device.set_connected_device(null_load())
-# La rama de abajo
-inv21.device.set_connected_device(line21.device)
-line21.device.set_CL(inv22.device.get_input_capacitance())
-inv22.device.set_connected_device(line22.device)
-line22.device.set_CL(ffd21.device.get_input_capacitance())
-ffd21.device.set_connected_device(null_load())
+# Creamos la instancia del circuito y calculamos el delay
+circuit = circuit(circuit_tree)
+delay = circuit.find_delay(ffd21, True)
+print(f"El delay del circuito es de {delay}")
 
-# Calculamos el delay total, etapa por etapa
-ffd1.set_delay(input_slew, rising_edge)
-ffd1.set_slew(input_slew, rising_edge)
-ffd1.print_status('ffd1')
-
-line1.set_delay(ffd1.output_slew, rising_edge)
-line1.set_slew(ffd1.output_slew, rising_edge)
-line1.print_status('line1')
-
-inv1.set_delay(line1.output_slew, rising_edge)
-inv1.set_slew(line1.output_slew, rising_edge)
-rising_edge = not rising_edge
-inv1.print_status('inv1')
-
-# Guardamos dos rising edges, uno para la parte de arriba y otro para abajo
-urising_edge = rising_edge
-lrising_edge = rising_edge
-
-# Seguimos con la parte de arriba
-tree_line.set_delay(inv1.output_slew, urising_edge, 1)
-tree_line.set_slew(inv1.output_slew, urising_edge, 1)
-tree_line.print_status('linea1')
-
-inv11.set_delay(tree_line.output_slew, urising_edge)
-inv11.set_slew(tree_line.output_slew, urising_edge)
-urising_edge = not urising_edge
-inv11.print_status('inv11')
-
-line11.set_delay(inv11.output_slew, urising_edge)
-line11.set_slew(inv11.output_slew, urising_edge)
-line11.print_status('line11')
-
-#ffd11.set_delay(line11.output_slew, urising_edge)
-#ffd11.print_status('ffd11')
-
-# La parte de abajo
-tree_line.set_delay(inv1.output_slew, urising_edge, 2)
-tree_line.set_slew(inv1.output_slew, urising_edge, 2)
-tree_line.print_status('linea2')
-
-inv21.set_delay(tree_line.output_slew, lrising_edge)
-inv21.set_slew(tree_line.output_slew, lrising_edge)
-lrising_edge = not lrising_edge
-inv21.print_status('inv21')
-
-line21.set_delay(inv21.output_slew, lrising_edge)
-line21.set_slew(inv21.output_slew, lrising_edge)
-line21.print_status('line21')
-
-inv22.set_delay(line21.output_slew, lrising_edge)
-inv22.set_slew(line21.output_slew, lrising_edge)
-lrising_edge = not lrising_edge
-inv22.print_status('inv22')
-
-line22.set_delay(inv22.output_slew, lrising_edge)
-line22.set_slew(inv22.output_slew, lrising_edge)
-line22.print_status('line22')
-
-#ffd21.set_delay(line22.output_slew, lrising_edge)
-#ffd21.print_status('ffd21')

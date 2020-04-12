@@ -1,8 +1,9 @@
 import pathlib
+from typing import List
 from Estimador import Estimador
+from device import Device
 
-
-class TableDevice():
+class TableDevice(Device):
 
     def __init__(self, table_path: pathlib.Path, c_in=3.1e-15, vdd=1.8, \
             error_threshold=1e-3):
@@ -12,10 +13,12 @@ class TableDevice():
         self.error_threshold = error_threshold 
         self.connected_device = None
         
-        
-    def set_connected_device(self, connected_device):
-        self.connected_device = connected_device
-
+    def set_connected_devices(self, devices: List[Device]) -> None:
+        """ Configura la carga del circuito """
+        if len(devices) == 1:
+            self.connected_device = devices[0]
+        else:
+            self.connected_device = None
 
     def get_delay(self, input_slew: float, rising_edge : bool) -> float:
         if not ((hasattr(self, "delay_rise") and rising_edge) or (hasattr(self, "delay_fall") and not rising_edge)):
@@ -36,6 +39,9 @@ class TableDevice():
     def get_input_capacitance(self) -> float:
         return self.c_in
 
+    def set_output_device(self, device: Device) -> None:
+        pass
+
     def get_output_slew(self, input_slew: float, rising_edge: bool) -> float:
         estimador = Estimador(self.connected_device.get_pi_model(), input_slew, \
                 self.vdd, self.table_path, self.error_threshold)
@@ -44,3 +50,15 @@ class TableDevice():
         else:
             _, slew, _ = estimador.estimar_retardo_fall()
         return slew
+
+class Inverter(TableDevice):
+
+    def __init__(self, table_path: pathlib.Path = 'tabla_datos_inversor.txt', c_in=3.1e-15, vdd=1.8, \
+            error_threshold=1e-3):
+        super(Inverter, self).__init__(table_path, c_in, vdd, error_threshold)
+
+class FFD(TableDevice):
+
+    def __init__(self, table_path: pathlib.Path = 'tabla_datos_FFD.txt', c_in=3.1e-15, vdd=1.8, \
+            error_threshold=1e-3):
+        super(FFD, self).__init__(table_path, c_in, vdd, error_threshold)

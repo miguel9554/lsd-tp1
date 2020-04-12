@@ -1,9 +1,13 @@
+import sys
+sys.path.insert(0, '../find_delay')
 import numpy as np
 from math import e as euler
 import matplotlib.pyplot as plt
+from typing import List
+from device import Device
 
 
-class RC_line:
+class RC_line(Device):
     def __init__(self, R: float, C: float, sections: int = 20, CL: float=0, Vdd: float=1.8):
         self.R = R
         self.C = C
@@ -11,8 +15,8 @@ class RC_line:
         self.sections = sections
         self.Vdd = Vdd
 
-    def set_CL(self, CL):
-        self.CL = CL
+    def set_connected_devices(self, devices: List[Device]) -> None:
+        self.CL = devices[0].get_input_capacitance()
 
     def get_50_percent_time(self, time: list, voltage: list, rising_edge: bool):
         voltage = np.array(voltage)
@@ -26,6 +30,9 @@ class RC_line:
         time[max_voltage_index+np.max(np.nonzero(voltage[max_voltage_index:] >= v_50))]
 
         return t_50 - t_ini
+
+    def set_output_device(self, device: Device) -> None:
+        pass
 
     def get_slew(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
         pade = self.get_pade12()
