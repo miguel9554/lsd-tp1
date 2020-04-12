@@ -1,20 +1,32 @@
+import sys
+sys.path.insert(0, '../find_delay')
 import numpy as np
 from math import e as euler
-from moments import RC_line
+from rc_line import RC_line
 import matplotlib.pyplot as plt
+from typing import List
+from device import Device
 
-
-class RC_tree:
+class RC_tree(Device):
     def __init__(self, line1: RC_line, line2: RC_line, line3: RC_line):
         self.line1 = line1
         self.line2 = line2
         self.line3 = line3
         self.Vdd = line1.Vdd
+        self.output_device = None
+        self.device1 = None
+        self.device2 = None
 
-    def set_CL(self, CL: float, line_number: int):
-        if line_number not in [1, 2]:
-            raise Exception('El número de línea tiene que ser 1 o 2')
-        setattr(self, 'line'+str(line_number)+'.CL', CL)
+    def set_connected_devices(self, devices: List[Device]) -> None:
+        self.line1.CL = 0
+        self.line2.CL = devices[0].get_input_capacitance()
+        self.line3.CL = devices[1].get_input_capacitance()
+
+        self.device1 = devices[0]
+        self.device2 = devices[1]
+
+    def set_output_device(self, device: Device) -> None:
+        self.output_device = device
 
     def write_conductance(self, G: np.array, g: float, a: int, b: int) -> np.array:
         """writes a conductance connected between a and b """
@@ -135,19 +147,15 @@ class RC_tree:
 
         return C1, C2, R
 
-    def get_delay(self, input_slew: float, line_number: int, \
-            rising_edge: bool, plot: bool = False) -> float:
-        if line_number not in [1, 2]:
-            raise Exception('El número de línea tiene que ser 1 o 2')
+    def get_delay(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
+        line_number = 1 if self.output_device == self.device1 else 2
         input_50_percent_time = input_slew*np.log(input_slew)
         output_slew = self.get_slew(line_number, input_slew, rising_edge, plot)
         delay = output_slew - input_50_percent_time
         return delay
 
-    def get_output_slew(self, input_slew: float, line_number: int,\
-            rising_edge: bool, plot: bool = False) -> float:
-        if line_number not in [1, 2]:
-            raise Exception('El número de línea tiene que ser 1 o 2')
+    def get_output_slew(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
+        line_number = 1 if self.output_device == self.device1 else 2
         output_slew = self.get_slew(line_number, input_slew, rising_edge, plot)
         return output_slew
 
