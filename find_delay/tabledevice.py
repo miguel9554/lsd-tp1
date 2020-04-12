@@ -22,13 +22,26 @@ class TableDevice(Device):
 
     def get_delay(self, input_slew: float, rising_edge : bool) -> float:
         if not ((hasattr(self, "delay_rise") and rising_edge) or (hasattr(self, "delay_fall") and not rising_edge)):
-            estimador = Estimador(self.connected_device.get_pi_model(), input_slew/0.69, self.vdd, self.table_path, self.error_threshold)
-            if rising_edge:
-                [self.load_ceff, self.slew_rise, self.delay_rise] = estimador.estimar_retardo_rise()
-                return self.delay_rise
+            estimador = Estimador(self.connected_device.get_pi_model(), input_slew/0.69, self.vdd, self.table_path, self.error_threshold)        
+            
+            if self.connected_device.__class__.__name__ == 'null_load':
+                aux_slew, _, aux_delay = estimador.buscar_en_tabla(estimador.tabla_timing, 0, estimador.Tau_in, rising_edge)
+                if rising_edge:
+                    self.slew_rise = aux_slew
+                    self.delay_rise = aux_delay
+                    print(self.delay_rise)
+                    return self.delay_rise
+                else:
+                    self.slew_fall = aux_slew
+                    self.delay_fall = aux_fall
+                    return self.delay_fall
             else:
-                [self.load_ceff, self.slew_fall, self.delay_fall] = estimador.estimar_retardo_fall()
-                return self.delay_fall
+                if rising_edge:
+                    [self.load_ceff, self.slew_rise, self.delay_rise] = estimador.estimar_retardo_rise()
+                    return self.delay_rise
+                else:
+                    [self.load_ceff, self.slew_fall, self.delay_fall] = estimador.estimar_retardo_fall()
+                    return self.delay_fall
         
         if rising_edge:
             return self.delay_rise
@@ -44,13 +57,25 @@ class TableDevice(Device):
 
     def get_output_slew(self, input_slew: float, rising_edge: bool) -> float:
         estimador = Estimador(self.connected_device.get_pi_model(), input_slew, \
-                self.vdd, self.table_path, self.error_threshold)
-        if rising_edge:
-            _, slew, _ = estimador.estimar_retardo_rise()
+                    self.vdd, self.table_path, self.error_threshold)
+                    
+        if self.connected_device.__class__.__name__ == 'null_load':
+            aux_slew, _, aux_delay = estimador.buscar_en_tabla(estimador.tabla_timing, 0, estimador.Tau_in, rising_edge)
+            if rising_edge:
+                self.slew_rise = aux_slew
+                self.delay_rise = aux_delay
+                return self.slew_rise
+            else:
+                self.slew_fall = aux_slew
+                self.delay_fall = aux_fall   
+                return self.slew_fall
         else:
-            _, slew, _ = estimador.estimar_retardo_fall()
-        return slew
-
+            if rising_edge:
+                _, slew, _ = estimador.estimar_retardo_rise()
+            else:
+                _, slew, _ = estimador.estimar_retardo_fall()
+            return slew        
+        
 class Inverter(TableDevice):
 
     def __init__(self, table_path: pathlib.Path = 'tabla_datos_inversor.txt', c_in=3.1e-15, vdd=1.8, \
