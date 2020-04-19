@@ -27,10 +27,10 @@ L21 = 30
 L22 = 100
 
 # El slew inicial, que es el del clock de ffd1
-# Para un flanco descendente: 441E-12
-# Para un flanco ascendente: 551E-12
-rising_edge = True
-input_slew = 551e-12 if rising_edge else 441e-12
+# Para un flanco asccendente: 441E-12
+# Para un flanco descendente: 551E-12
+rising_edge = False
+input_slew = 441e-12 if rising_edge else 551e-12
 
 # Construimos el árbol que representa al circuito
 # Rama principal

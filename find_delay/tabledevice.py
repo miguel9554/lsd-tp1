@@ -5,7 +5,7 @@ from device import Device
 
 class TableDevice(Device):
 
-    def __init__(self, table_path: pathlib.Path, c_in=3.1e-15, vdd=1.8, \
+    def __init__(self, table_path: pathlib.Path, c_in=3.1e-15, vdd=2.5, \
             error_threshold=1e-3):
         self.table_path = table_path
         self.c_in = c_in # Esta capacidad es de 3.1fF
@@ -29,11 +29,10 @@ class TableDevice(Device):
                 if rising_edge:
                     self.slew_rise = aux_slew
                     self.delay_rise = aux_delay
-                    print(self.delay_rise)
                     return self.delay_rise
                 else:
                     self.slew_fall = aux_slew
-                    self.delay_fall = aux_fall
+                    self.delay_fall = aux_delay
                     return self.delay_fall
             else:
                 if rising_edge:
@@ -67,7 +66,7 @@ class TableDevice(Device):
                 return self.slew_rise
             else:
                 self.slew_fall = aux_slew
-                self.delay_fall = aux_fall   
+                self.delay_fall = aux_delay   
                 return self.slew_fall
         else:
             if rising_edge:
@@ -78,12 +77,12 @@ class TableDevice(Device):
         
 class Inverter(TableDevice):
 
-    def __init__(self, table_path: pathlib.Path = 'tabla_datos_inversor.txt', c_in=3.1e-15, vdd=1.8, \
+    def __init__(self, table_path: pathlib.Path = 'tabla_datos_inversor.txt', c_in=3.1e-15, vdd=2.5, \
             error_threshold=1e-3):
         super(Inverter, self).__init__(table_path, c_in, vdd, error_threshold)
 
 class FFD(TableDevice):
 
-    def __init__(self, table_path: pathlib.Path = 'tabla_datos_FFD.txt', c_in=3.1e-15, vdd=1.8, \
+    def __init__(self, table_path: pathlib.Path = 'tabla_datos_FFD.txt', c_in=3.1e-15, vdd=2.5, \
             error_threshold=1e-3):
         super(FFD, self).__init__(table_path, c_in, vdd, error_threshold)

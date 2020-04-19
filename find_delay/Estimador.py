@@ -117,7 +117,7 @@ class Estimador:
 
             # Buscar en la tabla del FF o del inversor
             # [t_50, t_20] = buscar_en_tabla_FF(CL);
-            [t_50_sig, t_20, t_LH] = self.buscar_en_tabla(self.tabla_timing, CL, self.Tau_in, False);
+            [t_50_sig, t_20, t_LH] = self.buscar_en_tabla(self.tabla_timing, CL, self.Tau_in, True);
             
             
             # Obtener la siguiente iteracion de t0 y delta_t
@@ -201,7 +201,7 @@ class Estimador:
 
             # Buscar en la tabla del FF o del inversor
             # [t_50, t_20] = buscar_en_tabla_FF(CL);
-            [t_50_sig, t_20, t_HL] = self.buscar_en_tabla(self.tabla_timing, CL, self.Tau_in, True);
+            [t_50_sig, t_20, t_HL] = self.buscar_en_tabla(self.tabla_timing, CL, self.Tau_in, False);
             
             # Obtener la siguiente iteracion de t0 y delta_t
             sol = newton_raphson_multivariable(self.v_o_newton_raphson_fall_time, [t0, delta_t], jac=self.jacobiano_v_o_newton_raphson, args=(CL, t_50_sig + self.t_50_in, t_20 + self.t_50_in, Rd, 0.5*self.Vdd, 0.2*self.Vdd));
@@ -314,35 +314,41 @@ class Estimador:
         return ((self.Vdd)/(Rd*delta_t**2))*(Rd*delta_t - 2*(Rd**2)*CL*(1 - euler**(-delta_t/(Rd*CL))) + delta_t*Rd*euler**(-delta_t/(Rd*CL)))
         
     def buscar_en_tabla(self, tabla_timing, CL, Tau_in, es_rise_time):
-        err_rel_CL = 1
-        err_rel_tau = 1
+
+        err_rel_CL = CL
+        err_rel_tau = Tau_in
         
         indice_CL_elegido = 0
         tau_por_CL_determinado = False
         tau_por_CL = 0
         tau_anterior = 0
         CL_elegido = tabla_timing[0][0]
+        
+        # Determinar la cantidad de variaciones de Tau por cada valor de CL que existen en la tabla
         for i in range(len(tabla_timing)):
-            row = tabla_timing[i]
-            err_rel_sig = (row[0] - CL)/CL
-            if err_rel_sig < 0: err_rel_sig = -err_rel_sig
-            if err_rel_sig < err_rel_CL:
-                err_rel_CL = err_rel_sig
-                CL_elegido = row[0]
-                indice_CL_elegido = i
-            
             if not tau_por_CL_determinado:
+                row = tabla_timing[i]
                 if (row[1] > tau_anterior):
                     tau_por_CL = tau_por_CL + 1
                     tau_anterior = row[1]
                 else:
                     tau_por_CL_determinado = True
         
-        fila_elegida = tabla_timing[0]        
+
+        for i in range(1, len(tabla_timing), tau_por_CL):
+            row = tabla_timing[i]
+            err_rel_sig = (row[0] - CL)
+            if err_rel_sig < 0: err_rel_sig = -err_rel_sig
+            if err_rel_sig < err_rel_CL:
+                err_rel_CL = err_rel_sig
+                CL_elegido = row[0]
+                indice_CL_elegido = i
+            
+        fila_elegida = tabla_timing[indice_CL_elegido]      
         for i in range(len(tabla_timing)):
             row = tabla_timing[i]
-            if ((i >= indice_CL_elegido) or (i <= (indice_CL_elegido + tau_por_CL))):
-                err_rel_sig = (row[1] - Tau_in)/Tau_in
+            if ((i >= indice_CL_elegido) and (i <= (indice_CL_elegido + tau_por_CL))):
+                err_rel_sig = (row[1] - Tau_in)
                 if err_rel_sig < 0: err_rel_sig = -err_rel_sig
                 if err_rel_sig < err_rel_tau:
                     err_rel_tau = err_rel_sig
@@ -357,5 +363,5 @@ class Estimador:
             t_20 = -(fila_elegida[3]/2.2)*ln(0.2)
             t_delay = fila_elegida[4] # Si es un flanco descendente, el delay es el valor t_HL de la tabla            
         
-        
+
         return [t_50, t_20, t_delay]
