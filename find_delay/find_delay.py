@@ -22,10 +22,10 @@ L2 = 20
 L21 = 30
 L22 = 60
 # La línea del tramo de arriba
-L11 = 50
+L3 = 50
 # Las de abajo
-L21 = 30
-L22 = 100
+L4 = 30
+L5 = 100
 
 # El slew inicial, que es el del clock de ffd1
 # Para un flanco asccendente: 441E-12
@@ -46,19 +46,20 @@ tree_line = anytree.Node(name='tree_line', parent=inv1, \
 # La rama de arriba
 inv11 = anytree.Node(name='inv11', parent=tree_line, device=Inverter())
 line11 = anytree.Node(name='line11', parent=inv11, device=RC_line( \
-        r*L11, c*L11))
+        r*L3, c*L3))
 ffd11 = anytree.Node(name='ffd11', parent=line11, device=FFD())
 # Rama de abajo
 inv21 = anytree.Node(name='inv21', parent=tree_line, device=Inverter())
 line21 = anytree.Node(name='line21', parent=inv21, device=RC_line( \
-        r*L21, c*L21))
+        r*L4, c*L4))
 inv22 = anytree.Node(name='inv22', parent=line21, device=Inverter())
 line22 = anytree.Node(name='line22', parent=inv22, device=RC_line( \
-        r*L22, c*L22))
+        r*L5, c*L5))
 ffd21 = anytree.Node(name='ffd21', parent=line22, device=FFD())
 
-sim = Simulation(ffd1, "archivo_prueba.cir")
+sim = Simulation(ffd1, "archivo_prueba.cir", "simulation.txt")
 sim.build_simulation()
+sim.simulate_delays()
 
 # Creamos la instancia del circuito y calculamos el delay
 #circuit = circuit(circuit_tree)

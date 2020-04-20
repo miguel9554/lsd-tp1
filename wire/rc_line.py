@@ -14,6 +14,7 @@ class RC_line(Device):
         self.CL = CL
         self.sections = sections
         self.Vdd = Vdd
+        self.output_node = None # TODO: ver si esta bien inicializar esta variable asi
 
     def set_connected_devices(self, devices: List[Device]) -> None:
         self.CL = devices[0].get_input_capacitance()

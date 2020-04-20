@@ -12,6 +12,7 @@ class TableDevice(Device):
         self.vdd = vdd
         self.error_threshold = error_threshold 
         self.connected_device = None
+        self.output_node = None # TODO: chequear si esta bien inicializar esta variable asi
         
     def set_connected_devices(self, devices: List[Device]) -> None:
         """ Configura la carga del circuito """

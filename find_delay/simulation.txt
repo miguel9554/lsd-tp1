@@ -1,0 +1,28 @@
+********************************************* 
+**** Script en NUTMEG para ser llamado por Python **** 
+
+.control 
+* Cargar circuito 
+source archivo_prueba.cir
+
+set noprintheader 
+set noprintindex 
+set nobreak 
+tran 10p 200n 0n 
+
+* Guardar resultados de cada nodo 
+print v(4) > forma_onda_nodo_4.txt
+print v(5) > forma_onda_nodo_5.txt
+print v(25) > forma_onda_nodo_25.txt
+print v(26) > forma_onda_nodo_26.txt
+print v(26) > forma_onda_nodo_26.txt
+print v(66) > forma_onda_nodo_66.txt
+print v(87) > forma_onda_nodo_87.txt
+print v(107) > forma_onda_nodo_107.txt
+print v(86) > forma_onda_nodo_86.txt
+print v(109) > forma_onda_nodo_109.txt
+print v(129) > forma_onda_nodo_129.txt
+print v(130) > forma_onda_nodo_130.txt
+
+.endc
+.end

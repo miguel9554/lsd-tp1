@@ -1,17 +1,21 @@
 import anytree
+from subprocess import call # Para ejecutar SpiceOpus desde Python
 
 class Simulation:
     """ Representa la simulacion en SpiceOpus de un circuito """
     
-    def __init__(self, first_component: anytree.Node, simulation_path) -> None:
+    def __init__(self, first_component: anytree.Node, simulacion_circuit_path, simulation_conditions_path) -> None:
         self.first_component = first_component
-        self.simulation_path = simulation_path
-        self.simulation_node_list = [] 
+        self.simulacion_circuit_path = simulacion_circuit_path
+        self.simulation_conditions_path = simulation_conditions_path
         
     def build_simulation(self) -> None:
-        file = open(self.simulation_path,'w+')
+        file = open(self.simulacion_circuit_path,'w+')
              
         header = "********************************************* \n" \
+                 "** Cargar el inversor generador de la señal de clock\n" \
+                 ".include inversor_clk.inc\n\n" \
+                 "********************************************* \n" \
                  "**Fuente de alimentacion \n" \
                  "v1 1 0 dc 2.5 \n" \
                  "********************************************* \n\n" \
@@ -24,7 +28,7 @@ class Simulation:
                  "********************************************* \n\n" \
                  "********************************************* \n" \
                  "** Exitacion de entrada del circuito \n" \
-                 "v_in 4 0 PULSE 0 2.5 20n 30ps 30ps 40n 80n \n" \
+                 "v_in 4 0 PULSE 0 2.5 50n 30ps 30ps 1000n 2000n \n" \
                  "********************************************* \n"
              
         file.write(header)
@@ -33,8 +37,7 @@ class Simulation:
                           # porque los primeros cuatro ya se usaron para la alimentación y la señal de clock
         self.R_num = 0
         self.C_num = 0
-        self.ffd_num = 0
-        self.inv_num = 0
+        self.device_num = 1
        
         def iterate(component, starting_node):
            
@@ -64,6 +67,7 @@ class Simulation:
        
         iterate(self.first_component, self.node_num)
        
+        file.write(".end\n")
         file.truncate()
         file.close()
        
@@ -88,13 +92,13 @@ class Simulation:
             
         if (starting_node == self.node_num):
             initial_unit_text = f"""\
-R{self.R_num} {self.node_num} {self.node_num + 1}
-C{self.C_num} {self.node_num + 1} 0 \n\n"""
+R{self.R_num} ({self.node_num} {self.node_num + 1}) r={R_per_unit}
+C{self.C_num} ({self.node_num + 1} 0) c={C_per_unit} \n\n"""
 
         else:
             initial_unit_text = f"""\
-R{self.R_num} {starting_node} {self.node_num + 1}
-C{self.C_num} {self.node_num + 1} 0 \n\n"""
+R{self.R_num} ({starting_node} {self.node_num + 1}) r={R_per_unit}
+C{self.C_num} ({self.node_num + 1} 0) c={C_per_unit} \n\n"""
                                 
         file.write(initial_unit_text)
         self.R_num = self.R_num + 1
@@ -103,14 +107,16 @@ C{self.C_num} {self.node_num + 1} 0 \n\n"""
  
         for i in range(sections - 1):
             line_text = f"""\
-R{self.R_num} {self.node_num} {self.node_num + 1}
-C{self.C_num} {self.node_num + 1} 0 \n\n"""
+R{self.R_num} ({self.node_num} {self.node_num + 1}) r={R_per_unit}
+C{self.C_num} ({self.node_num + 1} 0) c={C_per_unit}\n\n"""
 
             file.write(line_text)
             self.R_num = self.R_num + 1
             self.C_num = self.C_num + 1
             self.node_num = self.node_num + 1     
 
+        component.output_node = self.node_num
+        
         return
     
     def add_tree_line(self, component, starting_node, file):
@@ -126,34 +132,104 @@ C{self.C_num} {self.node_num + 1} 0 \n\n"""
           
         component_text = f"""
 *********************************************
-** Flip-flop {self.ffd_num}
+** Flip-flop {self.device_num}
 * dff_x3ry1 RST D CLK QP VDD VSS
 * NOTA: El reset se encuentra puesto a masa
-X{self.ffd_num} 0 {starting_node} 3 {self.node_num + 1} 1 0 dff_x3ry1
+X{self.device_num} 0 {starting_node} 3 {self.node_num + 1} 1 0 dff_x3ry1
 ********************************************* \n\n"""
 
         file.write(component_text)
-        self.ffd_num = self.ffd_num + 1
+        self.device_num = self.device_num + 1
         self.node_num = self.node_num + 1
+        
+        component.output_node = self.node_num
+        
         return        
     
     def add_inverter(self, component, starting_node, file):
           
         component_text = f"""\
 *********************************************
-** Inversor {self.inv_num}
+** Inversor {self.device_num}
 * inv_x1y1 IN OUT VDD VSS
 * NOTA: El reset se encuentra puesto a masa
-X{self.inv_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
+X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
 ********************************************* \n\n"""
 
         file.write(component_text)
-        self.inv_num = self.inv_num + 1
+        self.device_num = self.device_num + 1
         self.node_num = self.node_num + 1
+        
+        component.output_node = self.node_num
+        
         return  
 
     
-    def find_delays(self):
+    def simulate_delays(self):
+ 
+        ##########################################################
+        # Identificar los nodos cuyo timing va a ser analizado
+        
+        source_node = 4 # Nodo de la fuente de exitacion del circuito
+        simulation_node_list = []
+        
+        def iterate(component, starting_node):
+           
+            present_component = component
+            previous_node = starting_node
+            
+            while(True):
+                component_name = present_component.device.__class__.__name__
+                if(component_name == "RC_tree"):
+                    simulation_node_list.append([present_component.device.line2.output_node, previous_node])
+                    simulation_node_list.append([present_component.device.line3.output_node, previous_node])
+                    iterate(present_component.children[0], present_component.device.line2.output_node)
+                    iterate(present_component.children[1], present_component.device.line3.output_node)
+                    break
+                else:
+                    simulation_node_list.append([present_component.device.output_node, previous_node])
+                    
+                
+                previous_node = present_component.device.output_node
+                if(len(present_component.children) == 0): break
+                else: present_component = present_component.children[0]
+            ## Fin del bucle ##
+            return
+       
+        iterate(self.first_component, source_node)
+        
+        ##########################################################
+        ## Preparar las condiciones de simulacion en base a los nodos identificados
+        
+        file = open(self.simulation_conditions_path,'w+')
+        
+        header = "********************************************* \n" \
+                 "**** Script en NUTMEG para ser llamado por Python **** \n" \
+                 "\n.control \n" \
+                 "* Cargar circuito \n" \
+                 "source archivo_prueba.cir\n\n" \
+                 "set noprintheader \n" \
+                 "set noprintindex \n" \
+                 "set nobreak \n" \
+                 "tran 10p 200n 0n \n\n" \
+                 "* Guardar resultados de cada nodo \n"
+        
+        file.write(header)
+        
+        # Guardar la forma de onda de todos los nodos finales de cada elemento del arbol
+        # TODO: EVITAR QUE SE SIMULEN DUPLICADOS
+        for i in range(len(simulation_node_list)-1):
+            node_file = "forma_onda_nodo_" + str(simulation_node_list[i][1]) + ".txt"
+            file.write(f"print v({simulation_node_list[i][1]}) > {node_file}\n")
+        
+        file.write("\n.endc\n.end\n")
+        file.truncate()
+        file.close()
+        
+        # Correr simulacion
+        call(["spiceopus", "-c", "-b", self.simulation_conditions_path]) 
+
+        return
     
     
     
