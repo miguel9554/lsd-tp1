@@ -6,12 +6,13 @@ from rc_tree import RC_tree
 from null_load import null_load
 from source import vsource
 from circuit import circuit
+from simulation import Simulation
 import anytree
 
 
-# Datos de resistencia y capacidad por unidad de longitud
+# Datos de resistencia y capacidad por unidad de longitud de las lineas de METAL 2
 # Se suponen líneas de 1 um de ancho
-c = 30e-18 + 40e-18 
+c = 13e-18 + 25e-18 
 r = 0.1
 
 # Largo de las líneas, en micrometros
@@ -46,7 +47,7 @@ tree_line = anytree.Node(name='tree_line', parent=inv1, \
 inv11 = anytree.Node(name='inv11', parent=tree_line, device=Inverter())
 line11 = anytree.Node(name='line11', parent=inv11, device=RC_line( \
         r*L11, c*L11))
-ffd11 = anytree.Node(name='ffd11', parent=line11, device=Inverter())
+ffd11 = anytree.Node(name='ffd11', parent=line11, device=FFD())
 # Rama de abajo
 inv21 = anytree.Node(name='inv21', parent=tree_line, device=Inverter())
 line21 = anytree.Node(name='line21', parent=inv21, device=RC_line( \
@@ -56,8 +57,11 @@ line22 = anytree.Node(name='line22', parent=inv22, device=RC_line( \
         r*L22, c*L22))
 ffd21 = anytree.Node(name='ffd21', parent=line22, device=FFD())
 
+sim = Simulation(ffd1, "archivo_prueba.cir")
+sim.build_simulation()
+
 # Creamos la instancia del circuito y calculamos el delay
-circuit = circuit(circuit_tree)
-delay = circuit.find_delay(ffd21, True)
-print(f"El delay del circuito es de {delay}")
+#circuit = circuit(circuit_tree)
+#delay = circuit.find_delay(ffd21, True)
+#print(f"El delay del circuito es de {delay}")
 
