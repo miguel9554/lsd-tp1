@@ -9,6 +9,8 @@ from circuit import circuit
 from simulation import Simulation
 import anytree
 
+# Tension de alimentacion de todo el circuito
+vdd = 2.5
 
 # Datos de resistencia y capacidad por unidad de longitud de las lineas de METAL 2
 # Se suponen líneas de 1 um de ancho
@@ -57,12 +59,20 @@ line22 = anytree.Node(name='line22', parent=inv22, device=RC_line( \
         r*L5, c*L5))
 ffd21 = anytree.Node(name='ffd21', parent=line22, device=FFD())
 
-sim = Simulation(ffd1, "archivo_prueba.cir", "simulation.txt")
-sim.build_simulation()
-sim.simulate_delays()
-
 # Creamos la instancia del circuito y calculamos el delay
-#circuit = circuit(circuit_tree)
-#delay = circuit.find_delay(ffd21, True)
-#print(f"El delay del circuito es de {delay}")
+circuit = circuit(circuit_tree)
+delay = circuit.find_delay(ffd21, True)
+print(f"El delay del circuito es de {delay}")
+
+# Creamos una simulacion y mostramos los resultados 
+sim = Simulation(ffd1, "archivo_prueba.cir", "simulation.txt", vdd)
+sim.build_simulation(rising_edge)
+[t50_vector, slew_vector] = sim.simulate_delays()
+print("************* Delays **************")
+print(t50_vector)
+print("************* Slew **************")
+print(slew_vector)
+
+#Calcular delay total de la simulacion
+
 

@@ -1,15 +1,17 @@
 import anytree
+import csv
 from subprocess import call # Para ejecutar SpiceOpus desde Python
 
 class Simulation:
     """ Representa la simulacion en SpiceOpus de un circuito """
     
-    def __init__(self, first_component: anytree.Node, simulacion_circuit_path, simulation_conditions_path) -> None:
+    def __init__(self, first_component: anytree.Node, simulacion_circuit_path, simulation_conditions_path, vdd) -> None:
         self.first_component = first_component
         self.simulacion_circuit_path = simulacion_circuit_path
         self.simulation_conditions_path = simulation_conditions_path
+        self.vdd = vdd
         
-    def build_simulation(self) -> None:
+    def build_simulation(self, is_rising_edge) -> None:
         file = open(self.simulacion_circuit_path,'w+')
              
         header = "********************************************* \n" \
@@ -22,14 +24,19 @@ class Simulation:
                  "********************************************* \n" \
                  "** Senal de reloj \n" \
                  "* Sintaxis: PULSE(V1 V2 DELAY RISE-TIME FALL-TIME DURACION_PULSO PERIODO)\n" \
-                 "vp_clk 2 0 PULSE 2.5 0 5n 30ps 30ps 10n 20n \n" \
+                 "vp_clk 2 0 PULSE 2.5 0 5n 30ps 30ps 20n 40n \n" \
                  "* inversor_clk IN OUT VDD VSS \n" \
                  "X0 2 3 1 0 inversor_clk \n" \
                  "********************************************* \n\n" \
                  "********************************************* \n" \
-                 "** Exitacion de entrada del circuito \n" \
-                 "v_in 4 0 PULSE 0 2.5 50n 30ps 30ps 1000n 2000n \n" \
-                 "********************************************* \n"
+                 "** Exitacion de entrada del circuito \n"
+                 
+        if (is_rising_edge):
+            header = header + "v_in 4 0 PULSE 0 2.5 30n 30ps 30ps 1000n 2000n \n" \
+                            "********************************************* \n"
+        else:
+            header = header + "v_in 4 0 PULSE 2.5 0 30n 30ps 30ps 1000n 2000n \n" \
+                            "********************************************* \n"         
              
         file.write(header)
 
@@ -61,7 +68,11 @@ class Simulation:
                 
                 next_node = self.node_num
                 if(len(present_component.children) == 0): break
-                else: present_component = present_component.children[0]
+                else: 
+                    if (present_component.children[0].device.__class__.__name__ != "null_load"):
+                        present_component = present_component.children[0]
+                    else:
+                        break
             ## Fin del bucle ##
             return
        
@@ -170,8 +181,9 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
         ##########################################################
         # Identificar los nodos cuyo timing va a ser analizado
         
-        source_node = 4 # Nodo de la fuente de exitacion del circuito
+        source_node = 3 # Nodo de la fuente de exitacion del circuito
         simulation_node_list = []
+        simulation_component_name = []
         
         def iterate(component, starting_node):
            
@@ -182,17 +194,24 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
                 component_name = present_component.device.__class__.__name__
                 if(component_name == "RC_tree"):
                     simulation_node_list.append([present_component.device.line2.output_node, previous_node])
+                    simulation_component_name.append(present_component.name + "1")
                     simulation_node_list.append([present_component.device.line3.output_node, previous_node])
+                    simulation_component_name.append(present_component.name + "2")
                     iterate(present_component.children[0], present_component.device.line2.output_node)
                     iterate(present_component.children[1], present_component.device.line3.output_node)
                     break
                 else:
                     simulation_node_list.append([present_component.device.output_node, previous_node])
+                    simulation_component_name.append(present_component.name)
                     
                 
                 previous_node = present_component.device.output_node
                 if(len(present_component.children) == 0): break
-                else: present_component = present_component.children[0]
+                else: 
+                    if (present_component.children[0].device.__class__.__name__ != "null_load"):
+                        present_component = present_component.children[0]
+                    else:
+                        break
             ## Fin del bucle ##
             return
        
@@ -211,14 +230,18 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
                  "set noprintheader \n" \
                  "set noprintindex \n" \
                  "set nobreak \n" \
-                 "tran 10p 200n 0n \n\n" \
+                 "tran 10p 50n 30n \n\n" \
                  "* Guardar resultados de cada nodo \n"
         
         file.write(header)
         
+        print(simulation_node_list)
+        
         # Guardar la forma de onda de todos los nodos finales de cada elemento del arbol
         # TODO: EVITAR QUE SE SIMULEN DUPLICADOS
-        for i in range(len(simulation_node_list)-1):
+        for i in range(len(simulation_node_list)):
+            node_file = "forma_onda_nodo_" + str(simulation_node_list[i][0]) + ".txt"
+            file.write(f"print v({simulation_node_list[i][0]}) > {node_file}\n")
             node_file = "forma_onda_nodo_" + str(simulation_node_list[i][1]) + ".txt"
             file.write(f"print v({simulation_node_list[i][1]}) > {node_file}\n")
         
@@ -228,9 +251,87 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
         
         # Correr simulacion
         call(["spiceopus", "-c", "-b", self.simulation_conditions_path]) 
+        
+        # Calcular el slew de cada forma de onda
+        slew_vector = []
+        t50_vector = []
+        t_50_previo = 0
+        for i in range(len(simulation_node_list)):
+            [t_50, slew] = self.calculate_delay("forma_onda_nodo_" + str(simulation_node_list[i][0]) + ".txt")
+   
+            t_50_anterior, _ = self.calculate_delay("forma_onda_nodo_" + str(simulation_node_list[i][1]) + ".txt")
+            
+            t50_vector.append((simulation_component_name[i], t_50 - t_50_anterior))
+            slew_vector.append((simulation_component_name[i], slew))
+            
+        return [t50_vector, slew_vector]
+        
+    # Halla el punto temporal donde se alcanza Vdd/2 (llamado t_50) para 
+    # una dada respuesta temporal de una linea representada por la funcion
+    # "resp"
+    # Recibe: resp : funcion que representa la respuesta temporal
+    #         max_time : maximo tiempo hasta el que iterar
+    #		  step : paso temporal para iterar
+    #		  Vdd : tension de alimentacion del circuito
+    #         *args : argumentos que recibe resp
+    #	  
+    def calculate_delay(self, signal_file):
 
-        return
-    
-    
-    
+        with open(signal_file) as csvfile:
+            table = list(csv.reader(csvfile, delimiter='\t'))
+            time = [];
+            voltage = [];
+
+            for row in table:
+                time.append(float(row[0]));
+                voltage.append(float(row[1]));
+
+            # Chequear si la señal sera un flanco descendente o ascendente
+            if (voltage[0] < self.vdd/2):
+                t10_ready = t50_ready = t90_ready = False
+                t90_voltage = 0.9*self.vdd
+                t_90 = 0
+                t50_voltage = 0.5*self.vdd
+                t_50 = 0 
+                t10_voltage = 0.1*self.vdd
+                t_10 = 0
+                for i in range(len(voltage)):
+                    if ((voltage[i] > t90_voltage) and t90_ready == False):
+                        t_90 = time[i]
+                        t90_ready = True
+                    if ((voltage[i] > t50_voltage) and t50_ready == False):
+                        t_50 = time[i]
+                        t50_ready = True
+                    if ((voltage[i] > t10_voltage) and t10_ready == False):
+                        t_10 = time[i]
+                        t10_ready = True
+                       
+                slew = (t_90 - t_10)*0.69/2.2 
+                t_50_abs = t_50
+     
+            else:
+                t10_ready = t50_ready = t90_ready = False
+                t90_voltage = 0.9*self.vdd
+                t_90 = 0
+                t50_voltage = 0.5*self.vdd
+                t_50 = 0 
+                t10_voltage = 0.1*self.vdd
+                t_10 = 0
+                for i in range(len(voltage)):
+                    if ((voltage[i] < t90_voltage) and t90_ready == False):
+                        t_90 = time[i]
+                        t90_ready = True
+                    if ((voltage[i] < t50_voltage) and t50_ready == False):
+                        t_50 = time[i]
+                        t50_ready = True
+                    if ((voltage[i] < t10_voltage) and t10_ready == False):
+                        t_10 = time[i]
+                        t10_ready = True
+                       
+                slew = (t_10 - t_90)*0.69/2.2 
+                t_50_abs = t_50           
+
+        return [t_50_abs, slew]
+
+			    
     
