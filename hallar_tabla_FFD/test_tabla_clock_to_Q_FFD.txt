@@ -17,8 +17,7 @@ set nobreak
 **********************
 ** Transicion LH *****
 **********************
-tran 1p 155n 145n
-*tran 1p 155n 135n
+tran 5p 180n 120n
 
 * Guardar resultados
 print v(2) v(5) > transicion_LH_FFD.txt
@@ -26,8 +25,7 @@ print v(2) v(5) > transicion_LH_FFD.txt
 **********************
 ** Transicion HL *****
 **********************
-tran 1p 280n 240n
-*tran 1p 80n 30n
+tran 5p 280n 220n
 
 * Guardar resultados
 print v(2) v(5) > transicion_HL_FFD.txt

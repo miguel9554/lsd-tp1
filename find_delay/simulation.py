@@ -193,15 +193,15 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
             while(True):
                 component_name = present_component.device.__class__.__name__
                 if(component_name == "RC_tree"):
-                    simulation_node_list.append([present_component.device.line2.output_node, previous_node])
+                    simulation_node_list.append([present_component.device.line2.output_node, previous_node,present_component.device.line2])
                     simulation_component_name.append(present_component.name + "1")
-                    simulation_node_list.append([present_component.device.line3.output_node, previous_node])
+                    simulation_node_list.append([present_component.device.line3.output_node, previous_node, present_component.device.line3])
                     simulation_component_name.append(present_component.name + "2")
                     iterate(present_component.children[0], present_component.device.line2.output_node)
                     iterate(present_component.children[1], present_component.device.line3.output_node)
                     break
                 else:
-                    simulation_node_list.append([present_component.device.output_node, previous_node])
+                    simulation_node_list.append([present_component.device.output_node, previous_node, present_component.device])
                     simulation_component_name.append(present_component.name)
                     
                 
@@ -235,8 +235,6 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
         
         file.write(header)
         
-        print(simulation_node_list)
-        
         # Guardar la forma de onda de todos los nodos finales de cada elemento del arbol
         # TODO: EVITAR QUE SE SIMULEN DUPLICADOS
         for i in range(len(simulation_node_list)):
@@ -263,6 +261,9 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
             
             t50_vector.append((simulation_component_name[i], t_50 - t_50_anterior))
             slew_vector.append((simulation_component_name[i], slew))
+            
+            simulation_node_list[i][2].simulated_delay = t_50 - t_50_anterior
+            simulation_node_list[i][2].simulated_slew = slew
             
         return [t50_vector, slew_vector]
         

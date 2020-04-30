@@ -154,11 +154,22 @@ class RC_tree(Device):
         delay = output_slew - input_50_percent_time
         return delay
 
+    def get_simulated_delay(self):
+        line = self.line1 if self.output_device == self.device1 else self.line2
+        simulated_delay = line.get_simulated_delay()
+        
+        return simulated_delay
+        
     def get_output_slew(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
         line_number = 1 if self.output_device == self.device1 else 2
         output_slew = self.get_slew(line_number, input_slew, rising_edge, plot)
         return output_slew
-
+        
+    def get_simulated_slew(self):
+        line = self.line1 if self.output_device == self.device1 else self.line2
+        simulated_delay = line.get_simulated_slew()
+        
+        return simulated_delay
 
     def temp_resp_LH_exp_input_2order_output(self, t, tau_in, line_transf, Vdd):
         """ Calcular la respuesta temporal a la salida de la linea para:

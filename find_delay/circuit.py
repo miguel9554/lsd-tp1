@@ -35,17 +35,26 @@ class circuit:
         rising_edge = self.tree.root.device.get_rising_edge()
 
         total_delay = 0
+        total_simulated_delay = 0
 
-        for idx, node in enumerate(downwards[:-1]):
+        for idx, node in enumerate(downwards[:-2]):
             node.device.set_output_device(downwards[idx+1])
             delay = node.device.get_delay(last_slew, rising_edge)
+            simulated_delay = node.device.get_simulated_delay()
             last_slew = node.device.get_output_slew(last_slew, rising_edge)
+            last_simulated_slew = node.device.get_simulated_slew()
             if isinstance(node.device, Inverter):
                 rising_edge = not rising_edge
             if debug:
-                print(f"{node.name} tiene un delay de {delay:.2e} " \
-                    f"y un slew de {last_slew:.2e}")
+                #print(f"{node.name} tiene un delay de {delay:.2e} " \
+                #    f"y un slew de {last_slew:.2e}")
+                print(f"{node.name}: \n" \
+                      f"Delay estimado: {delay:.2e} \n" \
+                      f"Delay simulado: {simulated_delay:.2e} \n"
+                      f"Slew estimado: {last_slew:.2e} \n" \
+                      f"Slew simulado: {last_simulated_slew:.2e} \n")                        
             total_delay += delay
+            total_simulated_delay += simulated_delay
 
-        return total_delay
+        return [total_delay, total_simulated_delay]
 

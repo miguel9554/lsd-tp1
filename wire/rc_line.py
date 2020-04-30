@@ -15,7 +15,15 @@ class RC_line(Device):
         self.sections = sections
         self.Vdd = Vdd
         self.output_node = None # TODO: ver si esta bien inicializar esta variable asi
+        self.simulated_slew = 0
+        self.simulated_delay = 0
+ 
+    def get_simulated_delay(self) -> float:
+        return self.simulated_delay
 
+    def get_simulated_slew(self) -> float:
+        return self.simulated_slew
+ 
     def set_connected_devices(self, devices: List[Device]) -> None:
         self.CL = devices[0].get_input_capacitance()
 

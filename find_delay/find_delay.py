@@ -59,20 +59,20 @@ line22 = anytree.Node(name='line22', parent=inv22, device=RC_line( \
         r*L5, c*L5))
 ffd21 = anytree.Node(name='ffd21', parent=line22, device=FFD())
 
-# Creamos la instancia del circuito y calculamos el delay
-circuit = circuit(circuit_tree)
-delay = circuit.find_delay(ffd21, True)
-print(f"El delay del circuito es de {delay}")
-
 # Creamos una simulacion y mostramos los resultados 
 sim = Simulation(ffd1, "archivo_prueba.cir", "simulation.txt", vdd)
 sim.build_simulation(rising_edge)
 [t50_vector, slew_vector] = sim.simulate_delays()
-print("************* Delays **************")
-print(t50_vector)
-print("************* Slew **************")
-print(slew_vector)
+#print("************* Delays **************")
+#print(t50_vector)
+#print("************* Slew **************")
+#print(slew_vector)
 
-#Calcular delay total de la simulacion
+# Creamos la instancia del circuito y calculamos el delay
+circuit = circuit(circuit_tree)
+delay, simulated_delay = circuit.find_delay(ffd21, True)
+print(f"El delay total del circuito es: \n" \
+      f"Estimado: {delay} \n" \
+      f"Simulado: {simulated_delay} \n")
 
 

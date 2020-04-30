@@ -13,6 +13,8 @@ class TableDevice(Device):
         self.error_threshold = error_threshold 
         self.connected_device = None
         self.output_node = None # TODO: chequear si esta bien inicializar esta variable asi
+        self.simulated_slew = 0
+        self.simulated_delay = 0
         
     def set_connected_devices(self, devices: List[Device]) -> None:
         """ Configura la carga del circuito """
@@ -74,7 +76,13 @@ class TableDevice(Device):
                 _, slew, _ = estimador.estimar_retardo_rise()
             else:
                 _, slew, _ = estimador.estimar_retardo_fall()
-            return slew        
+            return slew  
+
+    def get_simulated_delay(self) -> float:
+        return self.simulated_delay
+
+    def get_simulated_slew(self) -> float:
+        return self.simulated_slew
         
 class Inverter(TableDevice):
 
