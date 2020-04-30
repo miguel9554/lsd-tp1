@@ -5,6 +5,8 @@
 ** al producirse un flanco ascendente de reloj
 
 .control
+*.options relvar=0.3
+*.options slopetol = 0.2
 * Cargar circuito
 source test_tabla_clock_to_Q_FFD.cir
 
@@ -17,18 +19,18 @@ set nobreak
 **********************
 ** Transicion LH *****
 **********************
-tran 5p 180n 120n
+tran 2p 180n 120n
 
 * Guardar resultados
-print v(2) v(5) > transicion_LH_FFD.txt
-
+print v(5) v(2) > transicion_LH_FFD.txt
 **********************
 ** Transicion HL *****
 **********************
-tran 5p 280n 220n
+tran 2p 280n 220n
 
 * Guardar resultados
-print v(2) v(5) > transicion_HL_FFD.txt
+print v(5) v(2) > transicion_HL_FFD.txt
+print v(5) > prueba.txt
 
 .endc
 .end

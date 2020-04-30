@@ -8,7 +8,7 @@ def calcular_rise_time(archivo):
 
         for row in tabla_rise_time:
             tiempo.append(float(row[0]));
-            tension_salida.append(float(row[2]));
+            tension_salida.append(float(row[1]));
 
         valor_maximo = 0
         for i in range(len(tension_salida)):
@@ -17,11 +17,12 @@ def calcular_rise_time(archivo):
 
         tension_t90 = 0.9*valor_maximo
         t_90 = 0
+        
         for i in range(len(tension_salida)):
             if tension_salida[i] > tension_t90:
                 t_90 = tiempo[i]
                 break
-                
+          
         tension_t10 = 0.1*valor_maximo
         t_10 = 0
         for i in range(len(tension_salida)):
@@ -42,7 +43,7 @@ def calcular_fall_time(archivo):
 
         for row in tabla_fall_time:
             tiempo.append(float(row[0]));
-            tension_salida.append(float(row[2]));
+            tension_salida.append(float(row[1]));
 
         valor_maximo = tension_salida[10]
 
@@ -61,6 +62,10 @@ def calcular_fall_time(archivo):
                 break
 
         tf = t_10 - t_90;
+       
+        print(t_10)
+        print(t_90)
+        print(tf)
     return tf
 
 
@@ -73,8 +78,8 @@ def calcular_tLH(archivo):
 
         for row in tabla_rise_time:
             tiempo.append(float(row[0]));
-            tension_entrada.append(float(row[1]))
-            tension_salida.append(float(row[2]))
+            tension_entrada.append(float(row[2]))
+            tension_salida.append(float(row[1]))
 
         valor_maximo_entrada = 0
         for i in range(len(tension_entrada)):
@@ -129,8 +134,8 @@ def calcular_tHL(archivo):
 
         for row in tabla_rise_time:
             tiempo.append(float(row[0]));
-            tension_entrada.append(float(row[1]))
-            tension_salida.append(float(row[2]))
+            tension_entrada.append(float(row[2]))
+            tension_salida.append(float(row[1]))
 
         valor_maximo_salida = tension_salida[10]
 

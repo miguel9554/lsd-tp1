@@ -13,30 +13,30 @@ tran 10p 50n 30n
 * Guardar resultados de cada nodo 
 print v(5) > forma_onda_nodo_5.txt
 print v(3) > forma_onda_nodo_3.txt
-print v(25) > forma_onda_nodo_25.txt
+print v(55) > forma_onda_nodo_55.txt
 print v(5) > forma_onda_nodo_5.txt
-print v(26) > forma_onda_nodo_26.txt
-print v(25) > forma_onda_nodo_25.txt
-print v(66) > forma_onda_nodo_66.txt
-print v(26) > forma_onda_nodo_26.txt
-print v(86) > forma_onda_nodo_86.txt
-print v(26) > forma_onda_nodo_26.txt
-print v(87) > forma_onda_nodo_87.txt
-print v(66) > forma_onda_nodo_66.txt
-print v(107) > forma_onda_nodo_107.txt
-print v(87) > forma_onda_nodo_87.txt
-print v(108) > forma_onda_nodo_108.txt
-print v(107) > forma_onda_nodo_107.txt
-print v(109) > forma_onda_nodo_109.txt
-print v(86) > forma_onda_nodo_86.txt
-print v(129) > forma_onda_nodo_129.txt
-print v(109) > forma_onda_nodo_109.txt
-print v(130) > forma_onda_nodo_130.txt
-print v(129) > forma_onda_nodo_129.txt
-print v(150) > forma_onda_nodo_150.txt
-print v(130) > forma_onda_nodo_130.txt
-print v(151) > forma_onda_nodo_151.txt
-print v(150) > forma_onda_nodo_150.txt
+print v(56) > forma_onda_nodo_56.txt
+print v(55) > forma_onda_nodo_55.txt
+print v(156) > forma_onda_nodo_156.txt
+print v(56) > forma_onda_nodo_56.txt
+print v(206) > forma_onda_nodo_206.txt
+print v(56) > forma_onda_nodo_56.txt
+print v(207) > forma_onda_nodo_207.txt
+print v(156) > forma_onda_nodo_156.txt
+print v(257) > forma_onda_nodo_257.txt
+print v(207) > forma_onda_nodo_207.txt
+print v(258) > forma_onda_nodo_258.txt
+print v(257) > forma_onda_nodo_257.txt
+print v(259) > forma_onda_nodo_259.txt
+print v(206) > forma_onda_nodo_206.txt
+print v(309) > forma_onda_nodo_309.txt
+print v(259) > forma_onda_nodo_259.txt
+print v(310) > forma_onda_nodo_310.txt
+print v(309) > forma_onda_nodo_309.txt
+print v(360) > forma_onda_nodo_360.txt
+print v(310) > forma_onda_nodo_310.txt
+print v(361) > forma_onda_nodo_361.txt
+print v(360) > forma_onda_nodo_360.txt
 
 .endc
 .end

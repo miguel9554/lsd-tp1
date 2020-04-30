@@ -22,11 +22,11 @@ archivo_tabla_FFD = "tabla_datos_FFD.txt"
 # Valores de capacidad de salida para la tabla
 Cmin = 0
 Cmax = 15
-Cstep = 1
+Cstep = 3
 
-min_inversores = 0
-max_inversores = 40
-step_inversores = 5
+min_inversores = 30
+max_inversores = 31
+step_inversores = 1
 
 #########################################################################################
 ### Obtener el rango  de inversores que cargan al inversor de clock
