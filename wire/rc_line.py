@@ -72,7 +72,8 @@ class RC_line(Device):
 
 
     def get_delay(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
-        input_50_percent_time = input_slew*np.log(input_slew)
+#        input_50_percent_time = input_slew*np.log(input_slew)
+        input_50_percent_time = input_slew
         output_slew = self.get_slew(input_slew, rising_edge, plot)
         delay = output_slew - input_50_percent_time
         return delay

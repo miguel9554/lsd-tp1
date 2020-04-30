@@ -149,7 +149,8 @@ class RC_tree(Device):
 
     def get_delay(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
         line_number = 1 if self.output_device == self.device1 else 2
-        input_50_percent_time = input_slew*np.log(input_slew)
+#        input_50_percent_time = input_slew*np.log(input_slew)
+        input_50_percent_time = input_slew
         output_slew = self.get_slew(line_number, input_slew, rising_edge, plot)
         delay = output_slew - input_50_percent_time
         return delay
