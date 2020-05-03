@@ -1,8 +1,8 @@
 import sys
-sys.path.insert(0, '../find_delay')
+sys.path.insert(0, './estimation')
 import numpy as np
 from math import e as euler
-from rc_line import RC_line
+from wire.rc_line import RC_line
 import matplotlib.pyplot as plt
 from typing import List
 from device import Device

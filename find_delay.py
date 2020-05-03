@@ -1,12 +1,10 @@
-import sys
-sys.path.insert(0, '../wire')
-from tabledevice import Inverter, FFD
-from rc_line import RC_line
-from rc_tree import RC_tree
-from null_load import null_load
-from source import vsource
-from circuit import circuit
-from simulation import Simulation
+from estimation.tabledevice import Inverter, FFD
+from wire.rc_line import RC_line
+from wire.rc_tree import RC_tree
+from estimation.null_load import null_load
+from estimation.source import vsource
+from estimation.circuit import circuit
+from simulation.simulation import Simulation
 import anytree
 
 # Tension de alimentacion de todo el circuito
@@ -59,7 +57,7 @@ line22 = anytree.Node(name='line22', parent=inv22, device=RC_line( \
 ffd21 = anytree.Node(name='ffd21', parent=line22, device=FFD())
 
 # Creamos una simulacion y mostramos los resultados 
-sim = Simulation(ffd1, "archivo_prueba.cir", "simulation.txt", vdd)
+sim = Simulation(ffd1, "simulation/circuit.cir", "simulation/simulation.txt", vdd)
 sim.build_simulation(rising_edge)
 [t50_vector, slew_vector] = sim.simulate_delays()
 #print("************* Delays **************")

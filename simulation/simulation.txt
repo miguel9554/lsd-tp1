@@ -3,7 +3,7 @@
 
 .control 
 * Cargar circuito 
-source archivo_prueba.cir
+source simulation/circuit.cir
 
 set noprintheader 
 set noprintindex 

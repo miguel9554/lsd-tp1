@@ -1,7 +1,7 @@
 import pathlib
 from typing import List
-from Estimador import Estimador
-from device import Device
+from estimation.Estimador import Estimador
+from estimation.device import Device
 
 class TableDevice(Device):
 
@@ -86,12 +86,12 @@ class TableDevice(Device):
         
 class Inverter(TableDevice):
 
-    def __init__(self, table_path: pathlib.Path = 'tabla_datos_inversor.txt', c_in=3.1e-15, vdd=2.5, \
+    def __init__(self, table_path: pathlib.Path = 'estimation/tabla_datos_inversor.txt', c_in=3.1e-15, vdd=2.5, \
             error_threshold=1e-3):
         super(Inverter, self).__init__(table_path, c_in, vdd, error_threshold)
 
 class FFD(TableDevice):
 
-    def __init__(self, table_path: pathlib.Path = 'tabla_datos_FFD.txt', c_in=3.1e-15, vdd=2.5, \
+    def __init__(self, table_path: pathlib.Path = 'estimation/tabla_datos_FFD.txt', c_in=3.1e-15, vdd=2.5, \
             error_threshold=1e-3):
         super(FFD, self).__init__(table_path, c_in, vdd, error_threshold)

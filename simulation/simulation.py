@@ -1,5 +1,6 @@
 import anytree
 import csv
+import os
 from subprocess import call # Para ejecutar SpiceOpus desde Python
 
 class Simulation:
@@ -226,7 +227,7 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
                  "**** Script en NUTMEG para ser llamado por Python **** \n" \
                  "\n.control \n" \
                  "* Cargar circuito \n" \
-                 "source archivo_prueba.cir\n\n" \
+                 f"source {self.simulacion_circuit_path}\n\n" \
                  "set noprintheader \n" \
                  "set noprintindex \n" \
                  "set nobreak \n" \
@@ -264,6 +265,9 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
             
             simulation_node_list[i][2].simulated_delay = t_50 - t_50_anterior
             simulation_node_list[i][2].simulated_slew = slew
+        
+        for i in range(len(simulation_node_list)):
+            os.remove("forma_onda_nodo_" + str(simulation_node_list[i][0]) + ".txt")
             
         return [t50_vector, slew_vector]
         

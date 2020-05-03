@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '../find_delay')
+sys.path.insert(0, './estimation')
 import numpy as np
 from math import e as euler
 import matplotlib.pyplot as plt
