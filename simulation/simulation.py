@@ -268,7 +268,11 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
 
         # Cleanup    
         for i in range(len(simulation_node_list)):
-            os.remove("forma_onda_nodo_" + str(simulation_node_list[i][0]) + ".txt")
+            try:
+                os.remove("forma_onda_nodo_" + str(simulation_node_list[i][0]) + ".txt")
+                os.remove("forma_onda_nodo_" + str(simulation_node_list[i][1]) + ".txt")
+            except FileNotFoundError:
+                pass
         os.remove(self.simulacion_circuit_path)
         os.remove(self.simulation_conditions_path)
             
