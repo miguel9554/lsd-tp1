@@ -1,6 +1,6 @@
 from estimation.tabledevice import Inverter, FFD
-from wire.rc_line import RC_line
-from wire.rc_tree import RC_tree
+from estimation.wire.rc_line import RC_line
+from estimation.wire.rc_tree import RC_tree
 from estimation.null_load import null_load
 from estimation.source import vsource
 from estimation.circuit import circuit
