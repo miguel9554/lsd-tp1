@@ -265,9 +265,12 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
             
             simulation_node_list[i][2].simulated_delay = t_50 - t_50_anterior
             simulation_node_list[i][2].simulated_slew = slew
-        
+
+        # Cleanup    
         for i in range(len(simulation_node_list)):
             os.remove("forma_onda_nodo_" + str(simulation_node_list[i][0]) + ".txt")
+        os.remove(self.simulacion_circuit_path)
+        os.remove(self.simulation_conditions_path)
             
         return [t50_vector, slew_vector]
         
