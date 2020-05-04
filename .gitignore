@@ -1,7 +1,6 @@
 .idea/
 *.swp
 *.dat
-*.cir
 *.nutmeg
 
 # Github's boilerplate .gitignore

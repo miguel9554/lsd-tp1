@@ -8,7 +8,7 @@ from device import Device
 
 
 class RC_line(Device):
-    def __init__(self, R: float, C: float, sections: int = 20, CL: float=0, Vdd: float=1.8):
+    def __init__(self, R: float, C: float, sections: int = 20, CL: float=0, Vdd: float=2.5):
         self.R = R
         self.C = C
         self.CL = CL
@@ -50,14 +50,14 @@ class RC_line(Device):
         for time_step in np.linspace(0, 10*input_slew, 10000):
             time.append(time_step)
             voltage_value = self.temp_resp_LH_exp_input_2order_output(\
-                    time_step, input_slew, pade, self.Vdd) if rising_edge \
+                    time_step, input_slew/0.69, pade, self.Vdd) if rising_edge \
             else self.temp_resp_HL_exp_input_2order_output(\
-            time_step, input_slew, pade, self.Vdd)
+            time_step, input_slew/0.69, pade, self.Vdd)
             voltage.append(voltage_value)
         
         if plot:
             plt.plot(time, voltage, label='Salida')
-            plt.plot(time, self.Vdd*np.exp(-np.array(time)/input_slew), label='Entrada')
+            plt.plot(time, self.Vdd*np.exp(-np.array(time)/(input_slew/0.69)), label='Entrada')
             plt.legend()
             plt.ylabel('Tensión [V]')
             plt.xlabel('Tiempo [s]')

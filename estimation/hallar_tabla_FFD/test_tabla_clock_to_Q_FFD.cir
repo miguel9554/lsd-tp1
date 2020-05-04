@@ -1,0 +1,43 @@
+**************************************************************************
+*** Circuito para la simulacion del tiempo clock-to-Q la carga del FFD ***
+**************************************************************************
+
+** Cargar el inversor generador de la señal de clock
+.include inversor_clk_2.inc
+
+************ CIRCUITO ***************************************************
+.options relvar=0.01
+.options absvar=0.01
+.options slopetol = 0.1
+.options lvltim=0 
+**** Descripcion de los nodos ****
+* NODO 1: entrada de clk de flanco perfecto
+* NODO 2: entrada de clk de FFD
+* NODO 3: fuente de VCC=2.5V
+* NODO 4: entrada D del FFD
+* NODO 5: salida Q del FFD
+*************************************************************************
+
+** Fuente de alimentacion
+v1 3 0 dc 2.5
+
+********************************************* 
+** Senal de reloj 
+* Sintaxis: PULSE(V1 V2 DELAY RISE-TIME FALL-TIME DURACION_PULSO PERIODO)
+vp_clk 1 0 PULSE 2.5 0 50ns 1ps 1ps 50n 100n 
+* inversor_clk IN OUT VDD VSS 
+X0 1 2 3 0 inversor_clk 
+********************************************* 
+
+** Flip-flop D
+* dff_x3ry1 RST D CLK QP VDD VSS
+* NOTA: El reset se encuentra puesto a masa
+X1 0 4 2 5 3 0 dff_x3ry1
+
+** Senal en la entrada D
+vp_d 4 0 PULSE 0 2.5 120ns 1ps 1ps 100n 200n
+
+** Carga del FFD
+C (5 0) c=0.0f
+
+.end
