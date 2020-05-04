@@ -6,8 +6,6 @@
 ** Dicha salida esta destinada a ser utilizada como señal de clk en
 ** trabajo practico
 
-.include ../caracteristicas_proceso/dig_0p25u_2p5V_stdcells_slow.inc
-
 .subckt inversor_clk IN OUT VDD VSS
 	** Inversor a medir
 	X0 (IN OUT VDD VSS) inv_x1y1

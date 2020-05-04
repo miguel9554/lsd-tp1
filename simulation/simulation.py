@@ -17,6 +17,7 @@ class Simulation:
              
         header = "********************************************* \n" \
                  "** Cargar el inversor generador de la señal de clock\n" \
+                 ".include dig_0p25u_2p5V_stdcells_slow.inc \n" \
                  ".include inversor_clk.inc\n\n" \
                  "********************************************* \n" \
                  "**Fuente de alimentacion \n" \
