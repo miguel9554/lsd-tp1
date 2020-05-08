@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import uuid
 import multiprocessing as mp
+from typing import List, Tuple
 
 
 class RC_line:
@@ -17,7 +18,8 @@ class RC_line:
         self.L = L
         self.uid = str(uuid.uuid4())
 
-    def simulate_line(self, N: int = 50, plot: bool = True) -> None:
+    def simulate_line(self, N: int = 50, plot: bool = True) -> \
+            Tuple[List[float], List[float], List[float]]:
         """
         Simula la respuesta de la línea a un escalón
         """
@@ -49,15 +51,9 @@ class RC_line:
         circuit.clean()
         simulation.clean()
         results.clean()
+
+        return results.time, results.vin, results.vout
         
-        plt.plot(results.time, results.vin, label='Entrada')
-        plt.plot(results.time, results.vout, label='Salida Simulada')
-        plt.ylabel('Tensión [V]')
-        plt.xlabel('Tiempo [s]')
-        plt.grid()
-        plt.legend()
-        plt.show()
-    
     def min_sections(self, tolerance: float = 5, N_max: int = 150, plot: bool = False) -> int:
         """
         Obtiene el mínimo N con el que se puede representar a la línea
