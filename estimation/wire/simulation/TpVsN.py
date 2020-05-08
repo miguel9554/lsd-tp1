@@ -2,14 +2,14 @@ from Circuit import Circuit
 from Simulation import Simulation
 from Results import Results
 from Source import StepSource
-from RC_line import RC_line
+from RC_line_simulated import RC_line_simulated
 import matplotlib.pyplot as plt
 import numpy as np
 import uuid
 import multiprocessing as mp
 
 def get_N(r: float, c: float, L: float) -> int:    
-    line = RC_line(r, c, L*1e-6)
+    line = RC_line_simulated(r, c, L*1e-6)
     return line.parallel_min_sections()
 
 # parametros de la línea, res y cap por unidad de long, y longitud

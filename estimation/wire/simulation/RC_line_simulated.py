@@ -9,7 +9,7 @@ import multiprocessing as mp
 from typing import List, Tuple
 
 
-class RC_line:
+class RC_line_simulated:
 
     def __init__(self, r: float, c:float, L: float):
         """r y c, resistencia y capacidad por unidad de long, L longitud"""
