@@ -23,3 +23,13 @@ class StepSource(Source):
             format(initial_value=self.initial_value, pulsed_value=self.pulsed_value, delay_time=self.delay_time, rise_time=self.rise_time,
                    fall_time=self.fall_time, pulse_width=self.pulse_width, period=self.period)
 
+
+class ExpSource(Source):
+
+    def __init__(self, Vdd: float, rise_time: float):
+        self.Vdd = Vdd
+        self.rise_time = rise_time
+
+    def get_spiceopus_definition(self):
+        return f"vp 1 0 exp=(0 {self.Vdd} 0 {self.rise_time} 5 1)\n"
+
