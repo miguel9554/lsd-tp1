@@ -2,6 +2,7 @@
 *.swp
 *.dat
 *.nutmeg
+estimation/wire/simulation/*.cir
 
 # Github's boilerplate .gitignore
 
