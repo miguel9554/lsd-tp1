@@ -57,7 +57,7 @@ line22 = anytree.Node(name='line22', parent=inv22, device=RC_line( \
 ffd21 = anytree.Node(name='ffd21', parent=line22, device=FFD())
 
 # Creamos una simulacion y mostramos los resultados 
-sim = Simulation(ffd1, "simulation/circuit.cir", "simulation/simulation.txt", vdd)
+sim = Simulation(ffd1, "simulation/circuit.cir", "simulation/simulation.txt", vdd, True)
 sim.build_simulation(rising_edge)
 [t50_vector, slew_vector] = sim.simulate_delays()
 #print("************* Delays **************")

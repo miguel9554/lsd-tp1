@@ -6,11 +6,12 @@ from subprocess import call # Para ejecutar SpiceOpus desde Python
 class Simulation:
     """ Representa la simulacion en SpiceOpus de un circuito """
     
-    def __init__(self, first_component: anytree.Node, simulacion_circuit_path, simulation_conditions_path, vdd) -> None:
+    def __init__(self, first_component: anytree.Node, simulacion_circuit_path, simulation_conditions_path, vdd, cleanup=True) -> None:
         self.first_component = first_component
         self.simulacion_circuit_path = simulacion_circuit_path
         self.simulation_conditions_path = simulation_conditions_path
         self.vdd = vdd
+        self.cleanup = cleanup
         
     def build_simulation(self, is_rising_edge) -> None:
         file = open(self.simulacion_circuit_path,'w+')
@@ -268,14 +269,15 @@ X{self.device_num} {starting_node} {self.node_num + 1} 1 0 inv_x1y1
             simulation_node_list[i][2].simulated_slew = slew
 
         # Cleanup    
-        for i in range(len(simulation_node_list)):
-            try:
-                os.remove("forma_onda_nodo_" + str(simulation_node_list[i][0]) + ".txt")
-                os.remove("forma_onda_nodo_" + str(simulation_node_list[i][1]) + ".txt")
-            except FileNotFoundError:
-                pass
-        os.remove(self.simulacion_circuit_path)
-        os.remove(self.simulation_conditions_path)
+        if self.cleanup:
+            for i in range(len(simulation_node_list)):
+                try:
+                    os.remove("forma_onda_nodo_" + str(simulation_node_list[i][0]) + ".txt")
+                    os.remove("forma_onda_nodo_" + str(simulation_node_list[i][1]) + ".txt")
+                except FileNotFoundError:
+                    pass
+            os.remove(self.simulacion_circuit_path)
+            os.remove(self.simulation_conditions_path)
             
         return [t50_vector, slew_vector]
         
