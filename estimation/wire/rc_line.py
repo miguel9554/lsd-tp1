@@ -3,7 +3,7 @@ sys.path.insert(0, './estimation')
 import numpy as np
 from math import e as euler
 import matplotlib.pyplot as plt
-from typing import List
+from typing import Tuple, List
 from device import Device
 
 
@@ -44,17 +44,7 @@ class RC_line(Device):
         pass
 
     def get_slew(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
-        pade = self.get_pade12()
-        voltage = []
-        time = []
-        for time_step in np.linspace(0, 10*input_slew, 10000):
-            time.append(time_step)
-            voltage_value = self.temp_resp_LH_exp_input_2order_output(\
-                    time_step, input_slew/0.69, pade, self.Vdd) if rising_edge \
-            else self.temp_resp_HL_exp_input_2order_output(\
-            time_step, input_slew/0.69, pade, self.Vdd)
-            voltage.append(voltage_value)
-        
+        time, voltage = self.get_waveforms(input_slew, rising_edge) 
         if plot:
             plt.plot(time, voltage, label='Salida')
             plt.plot(time, self.Vdd*np.exp(-np.array(time)/(input_slew/0.69)), label='Entrada')
@@ -66,6 +56,18 @@ class RC_line(Device):
 
         return self.get_50_percent_time(time, voltage, rising_edge)
 
+    def get_waveforms(self, input_slew: float, rising_edge: bool) -> Tuple[List[float], List[float]]:
+        pade = self.get_pade12()
+        voltage = []
+        time = []
+        for time_step in np.linspace(0, 10*input_slew, 10000):
+            time.append(time_step)
+            voltage_value = self.temp_resp_LH_exp_input_2order_output(\
+                    time_step, input_slew/0.69, pade, self.Vdd) if rising_edge \
+            else self.temp_resp_HL_exp_input_2order_output(\
+            time_step, input_slew/0.69, pade, self.Vdd)
+            voltage.append(voltage_value)
+        return time, voltage
 
     def get_output_slew(self, input_slew: float, rising_edge: bool, plot: bool = False) -> float:
         return self.get_slew(input_slew, rising_edge, plot)
