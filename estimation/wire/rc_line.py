@@ -47,11 +47,15 @@ class RC_line(Device):
         time, voltage = self.get_waveforms(input_slew, rising_edge) 
         if plot:
             plt.plot(time, voltage, label='Salida')
-            plt.plot(time, self.Vdd*np.exp(-np.array(time)/(input_slew/0.69)), label='Entrada')
+            if rising_edge:
+                plt.plot(time, self.Vdd*(1-np.exp(-np.array(time)/(input_slew/0.69))), label='Entrada')
+            else:
+                plt.plot(time, self.Vdd*np.exp(-np.array(time)/(input_slew/0.69)), label='Entrada')
             plt.legend()
             plt.ylabel('Tensión [V]')
             plt.xlabel('Tiempo [s]')
             plt.title('Entrada y salida de la línea')
+            plt.grid()
             plt.show()
 
         return self.get_50_percent_time(time, voltage, rising_edge)
