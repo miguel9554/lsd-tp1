@@ -1,7 +1,7 @@
 from Circuit import Circuit
 from Simulation import Simulation
 from Results import Results
-from Source import StepSource
+from Source import StepSource, ExpSource
 import matplotlib.pyplot as plt
 import numpy as np
 import uuid
@@ -18,7 +18,7 @@ class RC_line_simulated:
         self.L = L
         self.uid = str(uuid.uuid4())
 
-    def simulate_line(self, N: int = 50, plot: bool = True) -> \
+    def simulate_line(self, rise_time: float, N: int = 50, plot: bool = True) -> \
             Tuple[List[float], List[float], List[float]]:
         """
         Simula la respuesta de la línea a un escalón
@@ -28,17 +28,12 @@ class RC_line_simulated:
         R = self.r*self.L
         tao = 5*R*C
 
-        # parametros de la fuente
-        V = 2.5
-        pulse_width = tao
-        period = pulse_width
-
         # parametros de la simulacion
-        end_time = pulse_width
-        time_step = end_time/1e4
+        end_time = rise_time*10
+        time_step = end_time/1e5
 
         # creamos los objetos
-        source = StepSource(V, pulse_width, period)
+        source = ExpSource(2.5, rise_time)
         circuit = Circuit(R, C, source, self.uid, N)
         simulation = Simulation(time_step, end_time, circuit, self.uid)
         results = Results(self.uid)
