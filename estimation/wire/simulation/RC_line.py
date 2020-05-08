@@ -17,6 +17,44 @@ class RC_line:
         self.L = L
         self.uid = str(uuid.uuid4())
 
+    def simulate_line(self, N: int = 50, plot: bool = True) -> None:
+        """
+        Simula la respuesta de la línea a un escalón
+        """
+        # parametros del circuito
+        C = self.c*self.L
+        R = self.r*self.L
+        tao = 5*R*C
+
+        # parametros de la fuente
+        V = 2.5
+        pulse_width = tao
+        period = pulse_width
+
+        # parametros de la simulacion
+        end_time = pulse_width
+        time_step = end_time/1e4
+
+        # creamos los objetos
+        source = StepSource(V, pulse_width, period)
+        circuit = Circuit(R, C, source, self.uid, N)
+        simulation = Simulation(time_step, end_time, circuit, self.uid)
+        results = Results(self.uid)
+
+        # simulamos y procesamos los resultados
+        simulation.run(results.filename)
+        results.process()
+
+        # limpiamos los archivos
+        circuit.clean()
+        simulation.clean()
+        results.clean()
+        
+        plt.plot(results.time, results.vout)
+        plt.ylabel('Tensión [V]')
+        plt.xlabel('Tiempo [s]')
+        plt.show()
+    
     def min_sections(self, tolerance: float = 5, N_max: int = 150, plot: bool = False) -> int:
         """
         Obtiene el mínimo N con el que se puede representar a la línea
