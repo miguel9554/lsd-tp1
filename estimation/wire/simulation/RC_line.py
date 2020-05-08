@@ -50,9 +50,12 @@ class RC_line:
         simulation.clean()
         results.clean()
         
-        plt.plot(results.time, results.vout)
+        plt.plot(results.time, results.vin, label='Entrada')
+        plt.plot(results.time, results.vout, label='Salida Simulada')
         plt.ylabel('Tensión [V]')
         plt.xlabel('Tiempo [s]')
+        plt.grid()
+        plt.legend()
         plt.show()
     
     def min_sections(self, tolerance: float = 5, N_max: int = 150, plot: bool = False) -> int:
