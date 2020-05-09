@@ -1,5 +1,6 @@
 import sys
 sys.path.insert(0, './estimation')
+sys.path.insert(0, '..')
 import numpy as np
 from math import e as euler
 import matplotlib.pyplot as plt
@@ -110,7 +111,7 @@ class RC_line(Device):
         E[state_vector_length-1] = 1
 
         # Conductancia y capacidad por cuadripolo
-        g = 1/(self.R*self.sections)
+        g = self.sections/self.R
         c = self.C/self.sections
         # Construimos la matriz de conductancias
         G = np.zeros((state_vector_length, state_vector_length))
