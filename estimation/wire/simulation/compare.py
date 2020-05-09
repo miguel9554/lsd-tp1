@@ -24,8 +24,8 @@ time_estimation, estimation_result = estimation_line.get_waveforms(input_slew, T
 
 plt.plot(time, simulation_input_signal, label='Entrada de simulacion')
 plt.plot(time, simulation_result, label='Salida Simulada')
-#plt.plot(time_estimation, 2.5*(1-np.exp(-np.array(time_estimation)/(input_slew/0.69))), label='Entrada estimada')
-#plt.plot(time_estimation, estimation_result, label='Salida estimada')
+plt.plot(time_estimation, 2.5*(1-np.exp(-np.array(time_estimation)/(input_slew/0.69))), label='Entrada estimada')
+plt.plot(time_estimation, estimation_result, label='Salida estimada')
 plt.ylabel('Tensión [V]')
 plt.xlabel('Tiempo [s]')
 plt.grid()
