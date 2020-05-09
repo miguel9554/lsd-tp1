@@ -20,7 +20,7 @@ class Simulation:
              
         header = "********************************************* \n" \
                  "** Cargar el inversor generador de la señal de clock\n" \
-                 f".include {process_characteristics_path.resolve()} \n" \
+                 f".include \'{process_characteristics_path.resolve()}\' \n" \
                  ".include inversor_clk.inc\n\n" \
                  "********************************************* \n" \
                  "**Fuente de alimentacion \n" \
