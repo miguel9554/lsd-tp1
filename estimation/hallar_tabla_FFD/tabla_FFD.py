@@ -20,62 +20,50 @@ archivo_transicion_HL_FFD = "transicion_HL_FFD.txt"
 archivo_tabla_FFD = "tabla_datos_FFD.txt"
 
 # Valores de capacidad de salida para la tabla
-Cmin = 1
+Cmin = 0
 Cmax = 15
-Cstep = 1
-slew_min = 100# En ps
-slew_max = 1400# En ps
-slew_step = 100# En ps
+Cstep = 3
+
+min_inversores = 30
+max_inversores = 31
+step_inversores = 1
 
 #########################################################################################
-
-## Generar un rango de tiempos de slew de entrada
-# NOTA: se ha tomado como maximo slew aquel provisto por un inversor
-# cargado a su vez con otros 30 inversores
-rango_slew = numpy.arange(slew_min, slew_max, slew_step)
-rango_slew = [x*1e-12 for x in rango_slew]
-
-# Se asume que la capacidad de entrada del inversor,
-# segun lo simulado, es 3fF
-C_load_clock = 150e-15
-
-rango_resistencias = [x*0.69/C_load_clock for x in rango_slew]
+### Obtener el rango  de inversores que cargan al inversor de clock
+rango_inversores = range(min_inversores, max_inversores, step_inversores)
 
 ### Obtener el rango de capacidades de salida posibles
 ## NOTA: se asume como maximo la de 5 inversores
 rango_capacidad = numpy.arange(Cmin, Cmax, Cstep)
-rango_capacidad = [x*1e-15 for x in rango_capacidad]
-
-# Crear la lista que sera la "tabla" de resultados segun Cout_ext del FFD
-tabla_timing = [0 for x in rango_capacidad]  
 
 # Crear la matriz de timing
-res, cap = len(rango_resistencias), len(rango_capacidad)
-matriz_timing = [[0 for x in range(res)] for y in range(cap)]  
+inv, cap = len(rango_inversores), len(rango_capacidad)
+matriz_timing = [[0 for x in range(inv)] for y in range(cap)]  
 
-# Iterar sobre las distintas capacidades de entrada 
+# Iterar sobre las distintas capacidades de entrada
 # y distintos slew para formar la tabla
 for cap_it in range(len(rango_capacidad)):
-	for res_it in range(len(rango_resistencias)):
-		modificar_simulacion(rango_capacidad[cap_it], rango_resistencias[res_it])
-		ejecutar_simulacion()
+    for inv_it in range(len(rango_inversores)):
+        modificar_simulacion(rango_capacidad[cap_it], rango_inversores[inv_it])
+        ejecutar_simulacion()
 
-		tr = calcular_rise_time(archivo_transicion_LH_FFD)
-		t_LH = calcular_tLH(archivo_transicion_LH_FFD)
-		tf = calcular_fall_time(archivo_transicion_HL_FFD)
-		t_HL = calcular_tHL(archivo_transicion_HL_FFD)
+        tr = calcular_rise_time(archivo_transicion_LH_FFD)
+        [t_LH, slew_clock] = calcular_tLH(archivo_transicion_LH_FFD)
+        tf = calcular_fall_time(archivo_transicion_HL_FFD)
+        t_HL = calcular_tHL(archivo_transicion_HL_FFD)
 
-		# Crear una unica lista como elemento de la matriz de timing
-		celda_timing = [rango_capacidad[cap_it], rango_slew[res_it],tr, tf, t_HL, t_LH]
+        # Crear una unica lista como elemento de la matriz de timing
+        celda_timing = [rango_capacidad[cap_it]*1e-15, slew_clock, tr, tf, t_HL, t_LH]
 
-		# Sumar la lista a la matriz de timing
-		matriz_timing[cap_it][res_it] = celda_timing
+        # Sumar la lista a la matriz de timing
+        matriz_timing[cap_it][inv_it] = celda_timing    
 
-
+        
+print("FIN")        
 with open(archivo_tabla_FFD, 'w') as f:
-	f.write('CL, Tau_in, Rise Time, Fall Time, Clock-to-Q-HL, Clock-to-Q-LH')
-	f.write("\n")
-	for cap in range(len(rango_capacidad)):
-		for res in range(len(rango_resistencias)):
-			f.write(','.join('{:.6e}'.format(i) for i in matriz_timing[cap][res]))
-			f.write("\n")
+    f.write('CL, Tau_in, Rise Time, Fall Time, Clock-to-Q-HL, Clock-to-Q-LH')
+    f.write("\n")
+    for cap in range(len(rango_capacidad)):
+        for inv_it in range(len(rango_inversores)):
+            f.write(','.join('{:.6e}'.format(i) for i in matriz_timing[cap][inv_it]))
+            f.write("\n")
