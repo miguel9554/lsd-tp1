@@ -3,7 +3,7 @@
 **************************************************************************
 
 ** Cargar el inversor generador de la señal de clock
-.include inversor_clk_2.inc
+.include inversor_clk.inc
 
 ************ CIRCUITO ***************************************************
 .options relvar=0.01
@@ -38,6 +38,6 @@ X1 0 4 2 5 3 0 dff_x3ry1
 vp_d 4 0 PULSE 0 2.5 120ns 1ps 1ps 100n 200n
 
 ** Carga del FFD
-C (5 0) c=0.0f
+C (5 0) c=3.0000000000000002e-15f
 
 .end
