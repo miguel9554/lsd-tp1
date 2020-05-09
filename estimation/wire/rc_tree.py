@@ -78,19 +78,19 @@ class RC_tree(Device):
         G[0, G.shape[1]-1] = 1
 
         # Agregamos las conductancias de la primer línea
-        g1 = 1/(self.line1.R*self.line1.sections)
+        g1 = self.line1.sections/self.line1.R
 
         for node in range(self.line1.sections):
             G = self.write_conductance(G, g1, node, node+1)
 
         # Agregamos las conductancias de la segunda línea
-        g2 = 1/(self.line2.R*self.line2.sections)
+        g2 = self.line2.sections/self.line2.R
         for node in range(self.line2.sections):
             node += self.line1.sections
             G = self.write_conductance(G, g2, node, node+1)
 
         # Agregamos las conductancias de la tercer línea
-        g3 = 1/(self.line3.R*self.line3.sections)
+        g3 = self.line3.sections/self.line3.R
         # La conductancia que va entre el primer nodo y el último de la 
         # primer línea
         G = self.write_conductance(G, g3, self.line1.sections,\
