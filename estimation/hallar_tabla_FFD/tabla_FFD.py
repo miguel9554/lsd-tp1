@@ -22,11 +22,11 @@ archivo_tabla_FFD = "tabla_datos_FFD.txt"
 # Valores de capacidad de salida para la tabla
 Cmin = 0
 Cmax = 15
-Cstep = 3
+Cstep = 1
 
-min_inversores = 30
-max_inversores = 31
-step_inversores = 1
+min_inversores = 25
+max_inversores = 40
+step_inversores = 5
 
 #########################################################################################
 ### Obtener el rango  de inversores que cargan al inversor de clock
@@ -65,5 +65,7 @@ with open(archivo_tabla_FFD, 'w') as f:
     f.write("\n")
     for cap in range(len(rango_capacidad)):
         for inv_it in range(len(rango_inversores)):
-            f.write(','.join('{:.6e}'.format(i) for i in matriz_timing[cap][inv_it]))
+            f.write(','.join('{:.6e}'.format(inv_it) for inv_it in matriz_timing[cap][inv_it]))
             f.write("\n")
+            
+            

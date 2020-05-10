@@ -6,10 +6,6 @@
 .include inversor_clk.inc
 
 ************ CIRCUITO ***************************************************
-.options relvar=0.01
-.options absvar=0.01
-.options slopetol = 0.1
-.options lvltim=0 
 **** Descripcion de los nodos ****
 * NODO 1: entrada de clk de flanco perfecto
 * NODO 2: entrada de clk de FFD
@@ -38,6 +34,6 @@ X1 0 4 2 5 3 0 dff_x3ry1
 vp_d 4 0 PULSE 0 2.5 120ns 1ps 1ps 100n 200n
 
 ** Carga del FFD
-C (5 0) c=3.0000000000000002e-15f
+C (5 0) c=0f
 
 .end

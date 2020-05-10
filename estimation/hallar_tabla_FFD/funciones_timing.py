@@ -62,10 +62,7 @@ def calcular_fall_time(archivo):
                 break
 
         tf = t_10 - t_90;
-       
-        print(t_10)
-        print(t_90)
-        print(tf)
+   
     return tf
 
 

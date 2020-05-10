@@ -34,7 +34,7 @@ def modificar_simulacion(cap, inv):
     # Modificar el archivo del circuito
     archivo_circuito = open(circuito,'r+')
     texto_archivo_circuito = archivo_circuito.read()    
-    texto_archivo_circuito = re.sub(r'(?<=c\=)(.*)(?=f)', str(cap*1e-15), texto_archivo_circuito)
+    texto_archivo_circuito = re.sub(r'(?<=c\=)(.*)(?=f)', str(cap), texto_archivo_circuito)
     archivo_circuito.seek(0)
     archivo_circuito.write(texto_archivo_circuito)
     archivo_circuito.truncate()

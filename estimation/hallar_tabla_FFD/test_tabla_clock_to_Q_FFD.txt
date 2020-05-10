@@ -19,14 +19,14 @@ set nobreak
 **********************
 ** Transicion LH *****
 **********************
-tran 2p 180n 120n
+tran 10p 180n 120n
 
 * Guardar resultados
 print v(5) v(2) > transicion_LH_FFD.txt
 **********************
 ** Transicion HL *****
 **********************
-tran 2p 280n 220n
+tran 10p 280n 220n
 
 * Guardar resultados
 print v(5) v(2) > transicion_HL_FFD.txt
