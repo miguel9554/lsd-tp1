@@ -86,7 +86,7 @@ sim.build_simulation(rising_edge)
 
 # Creamos la instancia del circuito y calculamos el delay
 circuit = circuit(circuit_tree)
-delay, simulated_delay = circuit.find_delay(ffd21, True, True)
+delay, simulated_delay = circuit.find_delay(ffd21, rising_edge, True)
 print(f"El delay total del circuito es: \n" \
       f"Estimado: {delay} \n" \
       f"Simulado: {simulated_delay} \n")

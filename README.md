@@ -50,7 +50,7 @@ Para crear una red que comienza en un flip-flop, luego es seguida por una línea
 
 `ffd11 = anytree.Node(name='ffd11', parent=line11, device=FFD())`
 
-Las líneas pueden terminar en un flip-flop o un inversor. Sin embargo, el delay del último componente de la red no será tenido en cuenta en el delay total del circuito.
+Los circuitos pueden terminar en un flip-flop o un inversor, pero no una línea. Sin embargo, el delay del último componente de la red no será tenido en cuenta en el delay total del circuito.
 
 También pueden crearse puntos de bifurcación del circuito utilizando un nodo "tree_line", como el siguiente:
 
