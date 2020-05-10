@@ -16,30 +16,9 @@ import numpy as np
 import sys
 import os
 
-#############################
-
-# Parametros del objeto:
-#
-# --> Vdd: tension de alimentacion de todo el circuito
-#
-# --> Tau_in: constante de tiempo del flanco de entrada (para el inversor)
-#         o del clock (para el flip-flop)
-#
-# --> tabla_fall/tabla_rise: string con el nombre del archivo donde se encuentra almacenada 
-#            la tabla del inversor o del FF
-#
-# --> modelo_pi: arreglo con los componentes del modelo pi [R, C1, C2]
-# 
-# --> umbral_err: condicion de corvergencia del algoritmo. Es un error relativo expresado
-#                 en forma no porcentual. Se aplica al parametro t_50 
-#                 (tiempo entre que comienza la transicion hasta que se alcanza Vdd/2). 
-#                 Por ejemplo: umbral_err = 0.001 para considerar que hubo
-#                 convergencia cuando la diferencia entre el resultado de una iteración (N) y la precendente (N-1) es menor
-#                 al 0.1% del valor de la iteracion N-1
-# --> debug: True para que imprima información sobre el proceso
-
-
 class Estimador:
+    """ Encargada de realizar la estimacion del delay y del slew para 
+        de salida para los inversores y flip-flops empleando sus tablas """
 
     def __init__(self, modelo_pi, Tau_in, Vdd, nombre_tabla_timing, umbral_err, \
             debug: bool = False):

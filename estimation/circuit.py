@@ -25,14 +25,13 @@ class circuit:
                 filter_=lambda node: not node.is_leaf):
             node.device.set_connected_devices([child.device for child in node.children])
 
-    def find_delay(self, output_node: anytree.Node, debug: bool = False) -> float:
+    def find_delay(self, output_node: anytree.Node, rising_edge: bool = True, debug: bool = False) -> float:
         """ Calcula el delay saliendo por el nodo indicado """
 
         w = anytree.Walker()
         upward, common, downwards = w.walk(self.tree.root, output_node.children[0])
 
         last_slew = self.tree.root.device.get_output_slew()
-        rising_edge = self.tree.root.device.get_rising_edge()
 
         total_delay = 0
         total_simulated_delay = 0
