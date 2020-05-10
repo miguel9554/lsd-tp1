@@ -1,7 +1,6 @@
 import anytree
 import csv
 import os
-from pathlib import Path
 from subprocess import call # Para ejecutar SpiceOpus desde Python
 
 class Simulation:
@@ -16,11 +15,10 @@ class Simulation:
         
     def build_simulation(self, is_rising_edge) -> None:
         file = open(self.simulacion_circuit_path,'w+')
-        process_characteristics_path = Path(__file__).parent.parent / 'caracteristicas_proceso' / 'dig_0p25u_2p5V_stdcells_slow.inc'
              
         header = "********************************************* \n" \
                  "** Cargar el inversor generador de la señal de clock\n" \
-                 f".include \'{process_characteristics_path.resolve()}\' \n" \
+                 f".include dig_0p25u_2p5V_stdcells_slow.inc \n" \
                  ".include inversor_clk.inc\n\n" \
                  "********************************************* \n" \
                  "**Fuente de alimentacion \n" \
