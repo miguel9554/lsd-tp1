@@ -128,7 +128,7 @@ class RC_line(Device):
                     continue
         G[G.shape[0]-1, 0] = 1
         G[0, G.shape[1]-1] = 1
-
+        
         # Construimos la matriz de capacidades
         C = np.zeros((state_vector_length, state_vector_length))
         for column in range(C.shape[0]-1):
@@ -140,7 +140,6 @@ class RC_line(Device):
 
         # Inicializamos la matriz de momentos en cero
         moments = np.zeros((state_vector_length, max_moment+1))
-
         invG = np.linalg.inv(G)
         moments[:,0] = invG.dot(E)
         for moment_order in range(1, max_moment+1):

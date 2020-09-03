@@ -25,16 +25,16 @@ sections = 50
 ################################################################
 ### Largos de las lineas del circuito en micrometros
 ################################################################
-L1 = 50
+L1 = 5
 # Estos son los largos de la línea común y de las dos ramas
-L2 = 20
-L21 = 30
-L22 = 60
+L2 = 2
+L21 = 3
+L22 = 6
 # La línea del tramo de arriba
-L3 = 50
+L3 = 5
 # Las de abajo
-L4 = 30
-L5 = 100
+L4 = 3
+L5 = 10
 
 rising_edge = True
 # El slew inicial, que es el del clock de ffd1

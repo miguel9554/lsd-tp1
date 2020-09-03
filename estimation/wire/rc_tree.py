@@ -218,9 +218,9 @@ class RC_tree(Device):
         for time_step in np.linspace(0, 10*input_slew, 10000):
             time.append(time_step)
             voltage_value = self.temp_resp_LH_exp_input_2order_output(\
-                    time_step, input_slew, pade, self.Vdd) if rising_edge \
+                    time_step, input_slew/0.69, pade, self.Vdd) if rising_edge \
             else self.temp_resp_HL_exp_input_2order_output(\
-            time_step, input_slew, pade, self.Vdd)
+            time_step, input_slew/0.69, pade, self.Vdd)
             voltage.append(voltage_value)
         
         if plot:
