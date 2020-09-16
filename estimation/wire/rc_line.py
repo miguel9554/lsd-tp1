@@ -294,8 +294,8 @@ class RC_line(Device):
         aux_matrix = np.linalg.inv(aux_matrix)
         aux_vect = np.array([0,1,z])
         [A, B, C] = np.dot(aux_matrix,aux_vect)
-        
-        return Vdd*D*(A*euler**(-p1*t) + B*euler**(-p2*t) + C*euler**(-p3*t))
+        return Vdd - Vdd*D*p1*((A/p1)*(1 - euler**(-p1*t)) + (B/p2)*(1 - euler**(-p2*t)) + (C/p3)*(1 - euler**(-p3*t)))        
+        #return Vdd*D*(A*euler**(-p1*t) + B*euler**(-p2*t) + C*euler**(-p3*t))
 
     def temp_resp_HL_exp_input_2order_output_initial_conditions(self, t, tau_in, line_transf, Vdd):
         p1 = 1/tau_in # Polo de la dseñal de entrada
