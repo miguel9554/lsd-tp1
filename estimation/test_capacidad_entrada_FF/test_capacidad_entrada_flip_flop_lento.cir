@@ -7,7 +7,7 @@
 * para que la excursion sea simetrica
 .include ../caracteristicas_proceso/dig_0p25u_2p5V_stdcells_slow.inc
 
-* Inversor cuya capacidad se va a analizar
+* Flip-flop cuya capacidad se va a analizar
 * dff_x3ry1 RST D CLK QP VDD VSS
 X1 0 2 4 5 4 0 dff_x3ry1
 
