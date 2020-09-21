@@ -3,6 +3,7 @@
 *.dat
 *.nutmeg
 estimation/wire/simulation/*.cir
+estimation/wire/simulation/*.png
 
 # Github's boilerplate .gitignore
 
