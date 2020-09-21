@@ -94,9 +94,12 @@ class RC_line_simulated:
             results.clean()
         
         if plot:
-            plt.plot(N_vec, T_vec)
-            plt.ylabel('Tiempo de crecimiento [s]')
-            plt.xlabel('Ctdad de cuadripolos')
+            plt.plot([int(n) for n in N_vec], [t*1e15 for t in T_vec])
+            plt.ylabel('Tiempo de crecimiento [fs]')
+            plt.xlabel('Cantidad de cuadripolos')
+            plt.title(f'Tiempo de crecimiento para línea de {int(np.ceil(self.L*1e6))} micro')
+            plt.grid()
+            plt.savefig('TpVsN.png')
             plt.show()
         
         # Consideramos el N mínimo como el mínimo de los N que tienen un tiempo
