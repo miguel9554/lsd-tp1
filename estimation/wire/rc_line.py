@@ -128,7 +128,7 @@ class RC_line(Device):
                     continue
         G[G.shape[0]-1, 0] = 1
         G[0, G.shape[1]-1] = 1
-
+        
         # Construimos la matriz de capacidades
         C = np.zeros((state_vector_length, state_vector_length))
         for column in range(C.shape[0]-1):
@@ -140,7 +140,6 @@ class RC_line(Device):
 
         # Inicializamos la matriz de momentos en cero
         moments = np.zeros((state_vector_length, max_moment+1))
-
         invG = np.linalg.inv(G)
         moments[:,0] = invG.dot(E)
         for moment_order in range(1, max_moment+1):
@@ -295,8 +294,8 @@ class RC_line(Device):
         aux_matrix = np.linalg.inv(aux_matrix)
         aux_vect = np.array([0,1,z])
         [A, B, C] = np.dot(aux_matrix,aux_vect)
-        
-        return Vdd*D*(A*euler**(-p1*t) + B*euler**(-p2*t) + C*euler**(-p3*t))
+        return Vdd - Vdd*D*p1*((A/p1)*(1 - euler**(-p1*t)) + (B/p2)*(1 - euler**(-p2*t)) + (C/p3)*(1 - euler**(-p3*t)))        
+        #return Vdd*D*(A*euler**(-p1*t) + B*euler**(-p2*t) + C*euler**(-p3*t))
 
     def temp_resp_HL_exp_input_2order_output_initial_conditions(self, t, tau_in, line_transf, Vdd):
         p1 = 1/tau_in # Polo de la dseñal de entrada

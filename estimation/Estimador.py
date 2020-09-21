@@ -61,7 +61,7 @@ class Estimador:
         [t_50, t_20, t_delay] = self.buscar_en_tabla(self.tabla_timing, CL, self.Tau_in, True)     
         t_90 = -(t_50/ln(2))*ln(0.1)
         
-        Rd = (t_90 - t_50)/(CL*ln(5));
+        Rd = (t_90 - t_50)/(CL*ln(5))
         
         delta_t = (10/3)*(t_50 - t_20)
         t0 = t_50 - 0.69*Rd*CL - delta_t/2 ### NOTA: OBSERVAR QUE ESTE VALOR ES NEGATIVO, PERO NO PARECIERA

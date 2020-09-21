@@ -1,0 +1,35 @@
+*******************************************************************************
+** Circuito para hallar el hold-time de un flip-flop
+*******************************************************************************
+
+* Usar modelo del flip-flop lento, estando sus NMOS y PMOS dimensionados
+* para que la excursion sea simetrica
+.include ../../caracteristicas_proceso/dig_0p25u_2p5V_stdcells_slow.inc
+
+* Flip-flop cuya capacidad se va a analizar
+* dff_x3ry1 RST D CLK QP VDD VSS
+X1 0 2 3 4 1 0 dff_x3ry1
+
+* Escalon del terminal D
+vd 2 0 PULSE 2.5 0 10n 0.1ps 0.1ps 1000n 1000n
+
+* Escalon del terminal de clock
+vclk 3 0 PULSE 0 2.5 10n 0.1ps 0.1ps 1000n 1000n
+
+* Alimentacion de 2.5V para el inversor
+v1 1 0 dc 2.5
+
+**********************************
+* La salida Q del FF es el nodo 4
+**********************************
+
+.end
+
+.control
+tran 10p 11.5n 9.6n
+set linewidth=4
+plot v(4), v(2), v(3) vs (time-9.8E-9)*1E9
++ xlabel 't[ns]'
++ ylabel 'V'
+
+.endc
